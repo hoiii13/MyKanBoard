@@ -10,7 +10,7 @@ class Tabs extends StatefulWidget {
   final index;
   final num;
   final username;
-  Tabs({Key? key, this.index = 0, this.num = 0, this.username})
+  Tabs({Key? key, this.index = 0, this.num = 0, this.username = "yds"})
       : super(key: key);
 
   @override
