@@ -68,25 +68,8 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
     /* _getCreateUser(); */
     int id = int.parse(widget.taskDetail["creator_id"]);
     _getCreateTasksUser(id);
-    var andriod = AndroidInitializationSettings('@mipmap/ic_launcher');
-    var iOS = IOSInitializationSettings();
-    var initSettings = InitializationSettings(android: andriod, iOS: iOS);
-    flutterLocalNotificationsPlugin.initialize(initSettings,
-        onSelectNotification: onSelectNotification);
+
     super.initState();
-  }
-
-  Future onSelectNotification(String? payload) async {
-    debugPrint("payload: $payload");
-    Navigator.pushNamed(context, '/');
-  }
-
-  showNotification() async {
-    var andriod = AndroidNotificationDetails('channelId', 'channelName');
-    var iOS = IOSNotificationDetails();
-    var platform = NotificationDetails(android: andriod, iOS: iOS);
-    await flutterLocalNotificationsPlugin.show(0, '实验一', '这是一个test', platform,
-        payload: '通知栏');
   }
 
   @override
