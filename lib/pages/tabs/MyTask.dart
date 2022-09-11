@@ -8,7 +8,9 @@ import 'package:http/http.dart' as http;
 //"我的任务"页面
 class MyTaskPage extends StatefulWidget {
   final user_id;
-  MyTaskPage({Key? key, required this.user_id}) : super(key: key);
+  final username;
+  MyTaskPage({Key? key, required this.user_id, this.username})
+      : super(key: key);
 
   @override
   State<MyTaskPage> createState() => _MyTaskPageState();
@@ -224,14 +226,15 @@ class _MyTaskPageState extends State<MyTaskPage>
           appBar: AppBar(
             centerTitle: true, //标题居中
             title: Text("我的任务",
-                style: TextStyle(fontSize: 14, color: Colors.white)),
+                style: TextStyle(fontSize: 14, color: Colors.black)),
             elevation: 0.5, //阴影高度
+            //shadowColor: Colors.red,
             bottom: TabBar(
               controller: tabController, //监听
               isScrollable: true,
               indicatorColor: Colors.red, //导航线（指示器）的颜色
               labelColor: Colors.red, //选中时的颜色
-              unselectedLabelColor: Colors.white, //未选中时的颜色
+              unselectedLabelColor: Colors.grey, //未选中时的颜色
 
               tabs: <Widget>[
                 Tab(text: "我的待办"),
@@ -263,7 +266,7 @@ class _MyTaskPageState extends State<MyTaskPage>
             },
             child: Icon(
               Icons.refresh,
-              color: Colors.white,
+              color: Colors.red,
             ),
           ),
         ));
@@ -294,9 +297,9 @@ class _MyTaskPageState extends State<MyTaskPage>
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => MyTaskDetailPage(
-                            taskDetail: toDos[index],
-                            user_id: widget.user_id,
-                          )));
+                          taskDetail: toDos[index],
+                          user_id: widget.user_id,
+                          username: widget.username)));
                 },
               ),
               onLongPressStart: (LongPressStartDetails details) {
@@ -373,31 +376,6 @@ class Projects {
     return "$project_id";
   }
 }
-
-/* class MyTasks {
-  final String tasks_id;
-  final String title;
-  final String desc;
-  final String date_started;
-  final String date_due;
-  final String owner_id;
-  final String column_id;
-  final String project_id;
-  MyTasks(
-      {required this.tasks_id,
-      required this.title,
-      required this.desc,
-      required this.date_started,
-      required this.date_due,
-      required this.owner_id,
-      required this.column_id,
-      required this.project_id});
-
-  @override
-  String toString() {
-    return "$tasks_id $title $date_due $owner_id $column_id";
-  }
-} */
 
 class ProjectColumns {
   final String column_id;

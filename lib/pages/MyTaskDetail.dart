@@ -3,13 +3,19 @@ import 'dart:convert';
 import 'package:board_app/pages/chatProject.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../pages/tabs/MyTask.dart';
 import '../colorAbout/color.dart';
 
 class MyTaskDetailPage extends StatefulWidget {
   final taskDetail;
   final user_id;
-  MyTaskDetailPage({Key? key, required this.taskDetail, required this.user_id})
+  final username;
+  MyTaskDetailPage(
+      {Key? key,
+      required this.taskDetail,
+      required this.user_id,
+      this.username})
       : super(key: key);
   @override
   State<MyTaskDetailPage> createState() => _MyTaskDetailPageState();
@@ -18,6 +24,8 @@ class MyTaskDetailPage extends StatefulWidget {
 class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
   String createUser = "";
   String _createUser = " ";
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   void _getCreateTasksUser(int id) async {
     var headers = {
@@ -60,7 +68,25 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
     /* _getCreateUser(); */
     int id = int.parse(widget.taskDetail["creator_id"]);
     _getCreateTasksUser(id);
+    var andriod = AndroidInitializationSettings('@mipmap/ic_launcher');
+    var iOS = IOSInitializationSettings();
+    var initSettings = InitializationSettings(android: andriod, iOS: iOS);
+    flutterLocalNotificationsPlugin.initialize(initSettings,
+        onSelectNotification: onSelectNotification);
     super.initState();
+  }
+
+  Future onSelectNotification(String? payload) async {
+    debugPrint("payload: $payload");
+    Navigator.pushNamed(context, '/');
+  }
+
+  showNotification() async {
+    var andriod = AndroidNotificationDetails('channelId', 'channelName');
+    var iOS = IOSNotificationDetails();
+    var platform = NotificationDetails(android: andriod, iOS: iOS);
+    await flutterLocalNotificationsPlugin.show(0, '实验一', '这是一个test', platform,
+        payload: '通知栏');
   }
 
   @override
@@ -71,18 +97,19 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
         Random().nextInt(Colors.primaries.length)]; //随机生成创建人员的头像的背景颜色
 
     int id = int.parse(widget.taskDetail["creator_id"]);
-    print("!! = ${widget.taskDetail}");
+    // print("!! = ${widget.taskDetail}");
     return Scaffold(
       appBar: AppBar(
+        elevation: 0.2,
         centerTitle: true,
         title: Text(
           "${widget.taskDetail["title"]}",
-          style: TextStyle(fontSize: 16, color: Colors.white),
+          style: TextStyle(fontSize: 15, color: Colors.red),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.navigate_before,
-            color: Colors.white,
+            color: Colors.red,
             size: 35,
           ),
           onPressed: () {
@@ -96,14 +123,14 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text(
+            /* const Text(
               "任务详情：",
-              textAlign: TextAlign.left,
-              style: TextStyle(color: Colors.blue, fontSize: 15),
-            ),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.red, fontSize: 15),
+            ), */
             Padding(
               //任务详情内容的显示
-              padding: EdgeInsets.only(top: 20.0),
+              padding: EdgeInsets.only(top: 5.0),
               child: Container(
                 //constraints: BoxConstraints(maxHeight: 100, minHeight: 30),
                 width: _width - 15.0 * 2,
@@ -116,135 +143,166 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                       width: 2.0,
                     ),
                     borderRadius: BorderRadius.circular(5.0)),
-                alignment: AlignmentDirectional.topStart,
+                //alignment: AlignmentDirectional.topStart,
                 child: Padding(
                   padding: EdgeInsets.all(15.0),
                   child: SingleChildScrollView(
-                    //设置框中的内容，实现框中内容的滚动
-                    child: Text(widget.taskDetail["description"]),
-                  ),
+                      //设置框中的内容，实现框中内容的滚动
+                      child: Column(
+                    children: <Widget>[
+                      Container(
+                        alignment: Alignment.topLeft,
+                        child: const Text(
+                          "任务详情：",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(color: Colors.black, fontSize: 15),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Container(
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          widget.taskDetail["description"],
+                          style: TextStyle(color: Colors.black45),
+                        ),
+                      )
+                    ],
+                  )),
                 ),
               ),
             ),
-            Container(
-              width: _width - 15.0 * 2,
-              margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
-              decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  //弄一个框出来
-                  border: Border.all(
-                    color: Color.fromARGB(255, 238, 238, 238),
-                    style: BorderStyle.solid,
-                    width: 2.0,
-                  ),
-                  borderRadius: BorderRadius.circular(5.0)),
-              child: Column(children: [
-                ListTile(
-                  contentPadding: EdgeInsets.all(5),
-                  leading: const Icon(
-                    Icons.calendar_today,
-                    color: Colors.blue,
-                  ),
-                  title: const Text(
-                    "开始时间:",
-                    style: TextStyle(color: Colors.blue, fontSize: 15),
-                  ),
-                  trailing: widget.taskDetail["date_started"] == "0"
-                      ? Text(
-                          "0000-00-00",
-                          style: TextStyle(color: Colors.blue, fontSize: 15),
-                        )
-                      : Text(
-                          "${DateTime.fromMillisecondsSinceEpoch(int.parse(widget.taskDetail["date_started"]) * 1000).toString().substring(0, 16)}",
-                          style: TextStyle(color: Colors.blue, fontSize: 15),
-                        ),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.all(5),
-                  leading: Icon(
-                    Icons.domain_verification,
-                    color: Colors.blue,
-                  ),
-                  title: Text(
-                    "结束时间:",
-                    style: TextStyle(color: Colors.blue, fontSize: 15),
-                  ),
-                  trailing: widget.taskDetail["date_due"] == "0"
-                      ? Text(
-                          "0000-00-00",
-                          style: TextStyle(color: Colors.blue, fontSize: 15),
-                        )
-                      : Text(
-                          "${DateTime.fromMillisecondsSinceEpoch(int.parse(widget.taskDetail["date_due"]) * 1000).toString().substring(0, 16)}",
-                          style: TextStyle(color: Colors.blue, fontSize: 15),
-                        ),
-                ),
-              ]),
-            ),
-            Container(
-              width: _width - 15.0 * 2,
-              margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
-              decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  //弄一个框出来
-                  border: Border.all(
-                    color: Color.fromARGB(255, 238, 238, 238),
-                    style: BorderStyle.solid,
-                    width: 2.0,
-                  ),
-                  borderRadius: BorderRadius.circular(5.0)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const ListTile(
-                    leading: Icon(
-                      Icons.people,
-                      color: Colors.blue,
+            Padding(
+              padding: EdgeInsets.only(top: 5.0),
+              child: Container(
+                width: _width - 15.0 * 2,
+                margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    //弄一个框出来
+                    border: Border.all(
+                      color: Color.fromARGB(255, 238, 238, 238),
+                      style: BorderStyle.solid,
+                      width: 2.0,
                     ),
-                    title: Text(
-                      "参与人员:",
-                      style: TextStyle(color: Colors.blue, fontSize: 15),
+                    borderRadius: BorderRadius.circular(5.0)),
+                child: Column(children: [
+                  ListTile(
+                    //contentPadding: EdgeInsets.all(5),
+                    leading: const Icon(
+                      Icons.calendar_today,
+                      color: Colors.black,
+                      size: 20,
                     ),
-                  ),
-                  Padding(
-                    //显示参与的人员的头像
-                    padding: EdgeInsets.only(left: 20),
-                    child: CircleAvatar(
-                      child: widget.taskDetail["assignee_name"] == ""
-                          ? Text(
-                              "${widget.taskDetail["assignee_username"].toString().substring(0, 1)}", //取名字的第一个字
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : Text(
-                              "${widget.taskDetail["assignee_name"].toString().substring(0, 1)}", //取名字的第一个字
-                              style: TextStyle(color: Colors.white),
-                            ),
-                      backgroundColor: Colors
-                          .primaries[Random().nextInt(Colors.primaries.length)],
+                    title: const Text(
+                      "开始时间:",
+                      style: TextStyle(color: Colors.black, fontSize: 15),
                     ),
+                    trailing: widget.taskDetail["date_started"] == "0"
+                        ? Text(
+                            "0000-00-00",
+                            style:
+                                TextStyle(color: Colors.black45, fontSize: 15),
+                          )
+                        : Text(
+                            "${DateTime.fromMillisecondsSinceEpoch(int.parse(widget.taskDetail["date_started"]) * 1000).toString().substring(0, 16)}",
+                            style:
+                                TextStyle(color: Colors.black45, fontSize: 15),
+                          ),
                   ),
                   ListTile(
+                    //contentPadding: EdgeInsets.all(5),
                     leading: Icon(
-                      Icons.person_outline,
-                      color: Colors.blue,
+                      Icons.domain_verification,
+                      color: Colors.black,
                     ),
                     title: Text(
-                      "创建人员:",
-                      style: TextStyle(color: Colors.blue, fontSize: 15),
+                      "结束时间:",
+                      style: TextStyle(color: Colors.black, fontSize: 15),
                     ),
+                    trailing: widget.taskDetail["date_due"] == "0"
+                        ? Text(
+                            "0000-00-00",
+                            style:
+                                TextStyle(color: Colors.black45, fontSize: 15),
+                          )
+                        : Text(
+                            "${DateTime.fromMillisecondsSinceEpoch(int.parse(widget.taskDetail["date_due"]) * 1000).toString().substring(0, 16)}",
+                            style:
+                                TextStyle(color: Colors.black45, fontSize: 15),
+                          ),
                   ),
-                  Padding(
-                    //显示创建人员的头像
-                    padding: EdgeInsets.fromLTRB(20, 0, 0, 8),
-                    child: CircleAvatar(
-                      child: Text(
-                        "${_createUser.toString().substring(0, 1)}", //取名字的前2个字
-                        style: TextStyle(color: Colors.white),
+                ]),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 5.0),
+              child: Container(
+                width: _width - 15.0 * 2,
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    //弄一个框出来
+                    border: Border.all(
+                      color: Color.fromARGB(255, 238, 238, 238),
+                      style: BorderStyle.solid,
+                      width: 2.0,
+                    ),
+                    borderRadius: BorderRadius.circular(5.0)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      leading: Icon(
+                        Icons.people,
+                        color: Colors.black,
                       ),
-                      backgroundColor: _adminColor,
+                      title: Text(
+                        "参与人员:",
+                        style: TextStyle(color: Colors.black, fontSize: 15),
+                      ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      //显示参与的人员的头像
+                      padding: EdgeInsets.only(left: 20),
+                      child: CircleAvatar(
+                        child: widget.taskDetail["assignee_name"] == ""
+                            ? Text(
+                                "${widget.taskDetail["assignee_username"].toString().substring(0, 1)}", //取名字的第一个字
+                                style: TextStyle(color: Colors.white),
+                              )
+                            : Text(
+                                "${widget.taskDetail["assignee_name"].toString().substring(0, 1)}", //取名字的第一个字
+                                style: TextStyle(color: Colors.white),
+                              ),
+                        backgroundColor: Color.fromARGB(255, 136, 199, 138),
+                        /* backgroundColor: Colors.primaries[
+                            Random().nextInt(Colors.primaries.length)], */
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        Icons.person_outline,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "创建人员:",
+                        style: TextStyle(color: Colors.black, fontSize: 15),
+                      ),
+                    ),
+                    Padding(
+                      //显示创建人员的头像
+                      padding: EdgeInsets.only(left: 20),
+                      child: CircleAvatar(
+                        child: Text(
+                          "${_createUser.toString().substring(0, 1)}", //取名字的前2个字
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                        // backgroundColor: _adminColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Container(
@@ -252,19 +310,21 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
               child: ElevatedButton(
                 child: Text(
                   "进入评论区",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.red),
                 ),
                 style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all(Size(200, 50)),
                     backgroundColor:
-                        MaterialStateProperty.all(Colors.blue[200])),
+                        MaterialStateProperty.all(Colors.grey[200])),
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => ChatProjectPage(
-                          task_id: widget.taskDetail["id"],
-                          user_id: widget.user_id,
-                          project_title: widget.taskDetail["title"],
-                          project_id: widget.taskDetail["project_id"])));
+                            task_id: widget.taskDetail["id"],
+                            user_id: widget.user_id,
+                            project_title: widget.taskDetail["title"],
+                            project_id: widget.taskDetail["project_id"],
+                            username: widget.username,
+                          )));
                 },
               ),
             )
@@ -289,6 +349,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
             ),
             borderRadius: BorderRadius.circular(5.0)));
   } */
+
 }
 
 class CreateTaskUser {

@@ -178,12 +178,12 @@ class _MyMessagePageState extends State<MyMessagePage> {
         centerTitle: true, //标题居中
         title: const Text(
           "我的消息",
-          style: TextStyle(fontSize: 14, color: Colors.white),
+          style: TextStyle(fontSize: 14, color: Colors.black),
         ),
         elevation: 0.5, //阴影高度
       ),
       body: RefreshIndicator(
-        color: Colors.blue,
+        color: Colors.red,
         onRefresh: () async {
           setState(() {
             _onRefresh();
@@ -197,7 +197,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
         },
         child: Icon(
           Icons.refresh,
-          color: Colors.white,
+          color: Colors.red,
         ),
       ),
     );
@@ -249,9 +249,9 @@ class _MyMessagePageState extends State<MyMessagePage> {
                                       blurRadius: 5.0,
                                       color: Colors.grey.withOpacity(1))
                                 ],
-                                color: Colors.blue[200],
+                                color: Color.fromARGB(255, 243, 70, 58),
                                 border: Border.all(
-                                  color: Color.fromARGB(255, 144, 202, 249),
+                                  color: Color.fromARGB(255, 243, 70, 58),
                                 ),
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(6))),
@@ -275,7 +275,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
                                 TextButton(
                                   child: Text(
                                     "点击查看任务",
-                                    style: TextStyle(color: Colors.blue[200]),
+                                    style: TextStyle(color: Colors.red),
                                   ),
                                   onPressed: () {
                                     /* Navigator.of(context).push(MaterialPageRoute(
@@ -299,7 +299,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
                                 Container(
                                   child: Icon(
                                     Icons.navigate_next,
-                                    color: Colors.blue[200],
+                                    color: Colors.red,
                                   ),
                                 ),
                               ],
@@ -337,7 +337,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
                         margin: EdgeInsets.all(10),
                         child: Text(
                           "评论时间：${DateTime.fromMillisecondsSinceEpoch(int.parse(messageList[index]["date_modification"]) * 1000).toString().substring(0, 16)}",
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
                         ),
                       ),
                     ],

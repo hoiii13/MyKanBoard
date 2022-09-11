@@ -10,7 +10,7 @@ class Tabs extends StatefulWidget {
   final index;
   final num;
   final username;
-  Tabs({Key? key, this.index = 0, this.num = 0, this.username = "yds"})
+  Tabs({Key? key, this.index = 0, this.num = 0, this.username = 'yds'})
       : super(key: key);
 
   @override
@@ -73,8 +73,7 @@ class _TabsState extends State<Tabs> {
     final List _pageList = [
       //页面集合
       MyTaskPage(
-        user_id: _userInfo["id"],
-      ), //我的任务
+          user_id: _userInfo["id"], username: _userInfo["username"]), //我的任务
       MyMessagePage(
           user_id: _userInfo["id"], username: _userInfo["username"]), //我的消息
       ProjectAboutpage(), //项目
@@ -92,12 +91,13 @@ class _TabsState extends State<Tabs> {
           });
         },
         iconSize: 28.0, //每个导航按钮的大小
-        fixedColor: Color.fromARGB(255, 130, 190, 239),
+        fixedColor: Colors.red,
         type: BottomNavigationBarType.fixed, //type是按钮的显示类型，这样写才可以让按钮超过3个
         items: [
           BottomNavigationBarItem(
               icon: Icon(Icons.pending_actions), label: "任务"),
-          BottomNavigationBarItem(icon: Icon(Icons.messenger), label: "消息"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline), label: "消息"),
           BottomNavigationBarItem(
               icon: Icon(Icons.fact_check_rounded), label: "项目"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "个人"),

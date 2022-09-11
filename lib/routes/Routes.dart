@@ -1,9 +1,23 @@
 import 'package:board_app/pages/chatProject.dart';
+/* import 'package:board_app/pages/tabs/MyMessage.dart';
+import 'package:board_app/pages/testNotice.dart'; */
 import 'package:flutter/material.dart';
 import '../pages/Tabs.dart';
+/* import '../pages/TestTime.dart';
+import '../pages/TestGongXiang.dart';
+import '../pages/chatProject.dart'; */
 
 final routes = {
   '/': (context, {aguments}) => Tabs(),
+  /*  '/notice': (context) => NoticePage(),
+  '/time': (context) => TestStreamBuilderPage(),
+  '/gongxiang': (context) => InheritedWidgetTestRoute(), */
+  '/chats': (context, {task_id, user_id, project_id, project_title}) =>
+      ChatProjectPage(
+          task_id: task_id,
+          user_id: user_id,
+          project_title: project_title,
+          project_id: project_id),
 };
 
 var onGenerateRoute = (RouteSettings settings) {

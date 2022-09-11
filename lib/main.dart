@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: createMaterialColor(Color.fromARGB(255, 134, 195, 245)),
+        primarySwatch: createMaterialColor(Colors.white),
       ),
       debugShowCheckedModeBanner: false, //去掉debug的图标
       initialRoute: '/', //表示初始化要加载的页面

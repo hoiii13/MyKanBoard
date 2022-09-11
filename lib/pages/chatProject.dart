@@ -1,7 +1,11 @@
 import 'dart:async';
+
+import 'package:board_app/pages/MyTaskDetail.dart';
+import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 //评论详情页
 class ChatProjectPage extends StatefulWidget {
@@ -9,12 +13,14 @@ class ChatProjectPage extends StatefulWidget {
   final user_id;
   final project_title;
   final project_id;
+  final username;
   ChatProjectPage(
       {Key? key,
       required this.task_id,
       required this.user_id,
       required this.project_title,
-      required this.project_id})
+      required this.project_id,
+      this.username})
       : super(key: key);
 
   @override
@@ -25,11 +31,16 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
   final _textController = TextEditingController(); //输入框内容监听
   ScrollController _msgController = new ScrollController();
 
+  StreamController<List> _streamController = StreamController();
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
   List AllComments = [];
 
   List sendComment = [];
   //根据任务得到这个任务的所有评论记录
-  _getComments(int task_id) async {
+  Future<List> _getComments(int task_id) async {
     var headers = {
       'Authorization':
           'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
@@ -49,12 +60,15 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final comments = json.decode(res);
-      setState(() {
-        AllComments = comments["result"];
-      });
+      if (mounted) {
+        setState(() {
+          AllComments = comments["result"];
+        });
+      }
     } else {
       print(response.reasonPhrase);
     }
+    return AllComments;
   }
 
 //添加评论
@@ -83,9 +97,11 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final sendText = json.decode(res);
-      setState(() {
-        text_id = sendText["result"];
-      });
+      if (mounted) {
+        setState(() {
+          text_id = sendText["result"];
+        });
+      }
     } else {
       print(response.reasonPhrase);
     }
@@ -114,10 +130,17 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final newComment = json.decode(res);
-      setState(() {
-        AllComments.add(newComment["result"]);
-        print("All = ${AllComments}");
-      });
+
+//为了实现在通知得到当@我的消息
+      if (newComment["result"]["comment"].contains('@' + widget.username)) {
+        showNotification(widget.project_title, newComment["result"]["comment"]);
+      }
+      if (mounted) {
+        setState(() {
+          AllComments.add(newComment["result"]);
+          print("All = ${AllComments}");
+        });
+      }
     } else {
       print(response.reasonPhrase);
     }
@@ -148,18 +171,20 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final allProjectUsers = json.decode(res);
-      setState(() {
-        _allProjectUsers = allProjectUsers["result"];
-        _allProjectUsers.forEach((key, value) {
-          //因为_allProjectUsers是Map类型
-          users.add(key);
-          /*  print("value = ${key}");
+      if (mounted) {
+        setState(() {
+          _allProjectUsers = allProjectUsers["result"];
+          _allProjectUsers.forEach((key, value) {
+            //因为_allProjectUsers是Map类型
+            users.add(key);
+            /*  print("value = ${key}");
           Map a = await _getUsers(int.parse(key));
           AllUsers.add(a);
 
           print("AllUSers = ${AllUsers}"); */
+          });
         });
-      });
+      }
     } else {
       print(response.reasonPhrase);
     }
@@ -190,15 +215,19 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final users = json.decode(res);
-      setState(() {
-        _user = users["result"];
-      });
+      if (mounted) {
+        setState(() {
+          _user = users["result"];
+        });
+      }
     } else {
       print(response.reasonPhrase);
     }
     return _user;
   }
 
+  List commentsAll = [];
+  late Timer _timer;
   @override
   void initState() {
     _getComments(int.parse(widget.task_id));
@@ -206,7 +235,48 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
       _jumpBottom();
     } */
 
+    _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) async {
+      //print("All  ==== ${AllComments[AllComments.length - 1]}");
+      List commentList = await _getComments(int.parse(widget.task_id));
+      commentsAll = commentList;
+
+      _streamController.add(commentList);
+    });
+
+    var andriod = AndroidInitializationSettings('@mipmap/ic_launcher');
+    var iOS = IOSInitializationSettings();
+    var initSettings = InitializationSettings(android: andriod, iOS: iOS);
+    flutterLocalNotificationsPlugin.initialize(initSettings,
+        onSelectNotification: onSelectNotification);
+
     super.initState();
+  }
+
+  bool _isDisposed = false;
+  @override
+  void dispose() {
+    _streamController.close();
+    _isDisposed = true;
+    _timer.cancel();
+    super.dispose();
+  }
+
+  Future onSelectNotification(String? payload) async {
+    debugPrint("payload: $payload");
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => MyMessagePage(
+              user_id: widget.user_id,
+              username: widget.username,
+            )));
+  }
+
+  showNotification(String title, String content) async {
+    var andriod = AndroidNotificationDetails('channelId', 'channelName');
+    var iOS = IOSNotificationDetails();
+    var platform = NotificationDetails(android: andriod, iOS: iOS);
+    await flutterLocalNotificationsPlugin.show(
+        DateTime.now().millisecondsSinceEpoch >> 10, title, content, platform,
+        payload: '通知栏');
   }
 
   //打开聊天页面显示最新的记录
@@ -222,17 +292,19 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 
   @override
   Widget build(BuildContext context) {
+    final _height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
+        elevation: 0.2,
         centerTitle: true,
         title: Text(
           widget.project_title,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
+          style: const TextStyle(fontSize: 16, color: Colors.black),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.navigate_before,
-            color: Colors.white,
+            color: Colors.grey,
             size: 35,
           ),
           onPressed: () {
@@ -249,12 +321,55 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           child: SafeArea(
             child: Column(
               children: [
-                chatView(AllComments, widget.user_id),
+                buildChatStream(),
                 inputView(),
               ],
             ),
           )),
     );
+  }
+
+  StreamBuilder<List> buildChatStream() {
+    return StreamBuilder(
+        stream: _streamController.stream,
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          //return Text("${snapshot.data}");
+          if (snapshot.data == null) {
+            return const Expanded(
+              child: Center(
+                  child: CircularProgressIndicator(
+                color: Colors.red,
+              )),
+            );
+          } else {
+            final ChatContents = snapshot.data;
+            int len = ChatContents.length - 1;
+            //print("LiaoTian = ${LiaoTian[0]}");
+            return Expanded(
+              child: ListView.builder(
+                  reverse: true, //先翻转再倒着输出，这样是为了在我们打开评论页面的时候页面是处于最底部
+                  controller: _msgController,
+                  itemCount: ChatContents.length,
+                  itemBuilder: (context, index) {
+                    return BubbleWidget(
+                      //avatar: comments[index]["avatar_path"] == "" ? name : ,
+                      text: ChatContents[len - index]["comment"],
+                      isMyself:
+                          ChatContents[len - index]["user_id"] == widget.user_id
+                              ? true
+                              : false,
+                      name: ChatContents[len - index]["name"] == null ||
+                              ChatContents[len - index]["name"] == ""
+                          ? ChatContents[len - index]["username"]
+                          : ChatContents[len - index]["name"],
+                      time: ChatContents[len - index]["date_creation"],
+                    );
+                  }),
+            );
+          }
+
+          //return chatView(snapshot.data, widget.user_id);
+        });
   }
 
 //聊天部分
@@ -334,18 +449,21 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
             ElevatedButton(
               onPressed: () async {
                 final text = _textController.text;
-                final testAllComments = AllComments;
-                int getComment_id = await _sendComment(
-                    int.parse(widget.task_id), int.parse(widget.user_id), text);
-                if (getComment_id != null) {
-                  _getSendText(getComment_id);
+                if (text.isNotEmpty) {
+                  int getComment_id = await _sendComment(
+                      int.parse(widget.task_id),
+                      int.parse(widget.user_id),
+                      text);
+                  if (getComment_id != null) {
+                    _getSendText(getComment_id);
+                  }
+                  _textController.clear(); //清空输入框的内容
+                  //_jumpBottom();
                 }
-                _textController.clear(); //清空输入框的内容
-                //_jumpBottom();
               },
               child: const Text(
                 "发送",
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.red),
               ),
             )
           ],
@@ -415,7 +533,6 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
                                   style: const TextStyle(color: Colors.grey),
                                 ),
                           onTap: () {
-                            //判断用name还是username
                             _textController.text =
                                 "${_textController.text + "@" + _people[index]["username"]} ";
                             Navigator.of(context).pop(_people[index]);
