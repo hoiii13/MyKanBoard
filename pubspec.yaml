@@ -1,4 +1,4 @@
-name: my_kanboard
+name: board_app
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -12,13 +12,15 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # build by specifying --build-name and --build-number, respectively.
 # In Android, build-name is used as versionName while build-number used as versionCode.
 # Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.17.6 <3.0.0"
+  sdk: '>=2.18.0-271.4.beta <3.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -34,6 +36,19 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  sqflite: ^2.0.3+1
+  http: ^0.13.5
+  get: ^4.6.5
+  video_player: ^2.4.6
+  flutter_easyrefresh: ^2.2.2
+  emoji_picker_flutter: ^1.3.1
+  flutter_keyboard_visibility: ^5.3.0
+  date_format: ^2.0.6
+  flutter_cupertino_datetime_picker: ^3.0.0
+  flutter_local_notifications: ^9.9.0
+  toast: ^0.3.0
+  intl: ^0.17.0
+  provider: ^6.0.3
 
 dev_dependencies:
   flutter_test:

@@ -328,7 +328,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           )),
     );
   }
-//评论内容
+
   StreamBuilder<List> buildChatStream() {
     return StreamBuilder(
         stream: _streamController.stream,
@@ -372,7 +372,37 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
         });
   }
 
-
+//聊天部分
+  Widget chatView(List comments, String user_id) {
+    if (comments.isEmpty) {
+      return const Expanded(
+          child: Center(
+        child: Text("暂时没有对话"),
+      ));
+    } else {
+      //_jumpBottom();
+      int len = comments.length - 1;
+      return Expanded(
+        child: ListView.builder(
+            reverse: true, //先翻转再倒着输出，这样是为了在我们打开评论页面的时候页面是处于最底部
+            controller: _msgController,
+            itemCount: comments.length,
+            itemBuilder: (context, index) {
+              return BubbleWidget(
+                //avatar: comments[index]["avatar_path"] == "" ? name : ,
+                text: comments[len - index]["comment"],
+                isMyself:
+                    comments[len - index]["user_id"] == user_id ? true : false,
+                name: comments[len - index]["name"] == null ||
+                        comments[len - index]["name"] == ""
+                    ? comments[len - index]["username"]
+                    : comments[len - index]["name"],
+                time: comments[len - index]["date_creation"],
+              );
+            }),
+      );
+    }
+  }
 
 //输入框
   Widget inputView() {
