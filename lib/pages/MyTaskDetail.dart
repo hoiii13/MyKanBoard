@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../pages/tabs/MyTask.dart';
 import '../colorAbout/color.dart';
+import 'package:board_app/component/requestNetwork.dart';
 
 class MyTaskDetailPage extends StatefulWidget {
   final taskDetail;
@@ -26,24 +27,16 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
   String _createUser = " ";
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+      RequestHttp httpCode = const RequestHttp();
 
   void _getCreateTasksUser(int id) async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getUser",
       "id": 1769674781,
       "params": {"user_id": id}
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -56,7 +49,6 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
       setState(() {
         _createUser = createUser;
       });
-      print("@! = ${createUser}");
     } else {
       print(response.reasonPhrase);
       throw ("error");

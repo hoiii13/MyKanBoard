@@ -3,6 +3,7 @@ import 'package:board_app/pages/chatProject.dart';
 import 'package:board_app/pages/testNotice.dart'; */
 import 'package:flutter/material.dart';
 import '../pages/Tabs.dart';
+import 'package:board_app/pages/Login.dart';
 /* import '../pages/TestTime.dart';
 import '../pages/TestGongXiang.dart';
 import '../pages/chatProject.dart'; */
@@ -18,6 +19,8 @@ final routes = {
           user_id: user_id,
           project_title: project_title,
           project_id: project_id),
+  '/login': (context) => LoginPage(),
+  
 };
 
 var onGenerateRoute = (RouteSettings settings) {

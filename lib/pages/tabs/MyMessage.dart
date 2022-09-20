@@ -3,6 +3,7 @@ import 'package:board_app/pages/chatProject.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:board_app/component/requestNetwork.dart';
 
 //"我的消息"页面
 class MyMessagePage extends StatefulWidget {
@@ -16,6 +17,8 @@ class MyMessagePage extends StatefulWidget {
 }
 
 class _MyMessagePageState extends State<MyMessagePage> {
+  RequestHttp httpCode = const RequestHttp();
+
   List _messageList = [];
   List _TaskDetails = [];
 
@@ -32,19 +35,11 @@ class _MyMessagePageState extends State<MyMessagePage> {
   List Allprojects = [];
   //得到所有项目的id
   _getProject() async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode(
-        {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212});
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
+    final response = await httpCode.requestHttpCode(json.encode({
+      "jsonrpc": "2.0", 
+      "method": "getAllProjects", 
+      "id": 2134420212})
+    );
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
       throw ("error");
@@ -57,7 +52,6 @@ class _MyMessagePageState extends State<MyMessagePage> {
       for (var i = 0; i < Allprojects.length; i++) {
         _getData(int.parse(Allprojects[i]["id"]));
       }
-      //print("AllPorject = ${Allprojects}");
     });
   }
 
@@ -65,22 +59,12 @@ class _MyMessagePageState extends State<MyMessagePage> {
   //得到所有项目中的任务
   _getData(int id) async {
     //获得数据
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getBoard",
       "id": 827046470,
       "params": [id]
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -100,23 +84,6 @@ class _MyMessagePageState extends State<MyMessagePage> {
       });
 
       final mytasks = _tasks;
-
-      /* .map<Tasks>((row) {
-        return Tasks(
-            title: row["title"],
-            desc: row["description"],
-            owner_name: row["assignee_name"] == ""
-                ? row["assignee_username"]
-                : row["assignee_name"],
-            create_id: row["creator_id"],
-            date_started: row["date_started"],
-            date_due: row["date_due"],
-            status: row["column_name"],
-            owner_id: row["owner_id"],
-            column_id: row["column_id"],
-            task_id: row["id"],
-            project_id: row["project_id"]);
-      }); */
       _Alltasks.addAll(mytasks);
     } else {
       print(response.reasonPhrase);
@@ -126,23 +93,12 @@ class _MyMessagePageState extends State<MyMessagePage> {
 //根据所有任务得到所有评论
   List _AllComments = [];
   _getComments(int task_id) async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getAllComments",
       "id": 148484683,
       "params": {"task_id": task_id}
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
+    }));
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final comments = json.decode(res);

@@ -5,12 +5,13 @@ import 'package:board_app/pages/tabs/ProjectAbout.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:board_app/component/requestNetwork.dart';
 
 class Tabs extends StatefulWidget {
   final index;
   final num;
   final username;
-  Tabs({Key? key, this.index = 0, this.num = 0, this.username = 'yds'})
+  Tabs({Key? key, this.index = 0, this.num = 0, this.username = "yds"})
       : super(key: key);
 
   @override
@@ -20,23 +21,15 @@ class Tabs extends StatefulWidget {
 class _TabsState extends State<Tabs> {
   Map _userInfo = {};
   String userInfo_id = "";
+  RequestHttp httpCode = const RequestHttp();
+
   _getUser(String username) async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getUserByName",
       "id": 1769674782,
       "params": {"username": username}
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();

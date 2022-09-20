@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:board_app/component/requestNetwork.dart';
 
 //评论详情页
 class ChatProjectPage extends StatefulWidget {
@@ -36,26 +37,19 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  RequestHttp httpCode = const RequestHttp();
+
   List AllComments = [];
 
   List sendComment = [];
   //根据任务得到这个任务的所有评论记录
   Future<List> _getComments(int task_id) async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getAllComments",
       "id": 148484683,
       "params": {"task_id": task_id}
-    });
-    request.headers.addAll(headers);
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -74,14 +68,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 //添加评论
   Future<int> _sendComment(int task_id, int user_id, String content) async {
     int? text_id;
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'POST', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "createComment",
       "id": 1580417921,
@@ -90,9 +77,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
         "user_id": user_id,
         "content": content,
       }
-    });
-    request.headers.addAll(headers);
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -110,22 +95,12 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 
 //得到将新添加的评论的id然后添加到评论的List中
   _getSendText(int commtent_id) async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getComment",
       "id": 867839500,
       "params": {"comment_id": commtent_id}
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -151,22 +126,12 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     Map _allProjectUsers = {};
     List users = [];
     List AllUsers = [];
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getProjectUsers",
       "id": 1601016721,
       "params": [project_id]
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -195,22 +160,12 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 //根据user_id得到用户的信息
   Future<Map> _getUsers(int user_id) async {
     Map _user = {};
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getUser",
       "id": 1769674781,
       "params": {"user_id": user_id}
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();

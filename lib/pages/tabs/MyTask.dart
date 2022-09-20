@@ -4,6 +4,7 @@ import 'package:board_app/pages/tabs/ProjectAbout.dart';
 import 'package:board_app/routes/Routes.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:board_app/component/requestNetwork.dart';
 
 //"我的任务"页面
 class MyTaskPage extends StatefulWidget {
@@ -23,6 +24,8 @@ class _MyTaskPageState extends State<MyTaskPage>
   List toDos1 = [];
   List toDos2 = [];
   late AnimationController _animateController;
+  
+  RequestHttp httpCode = const RequestHttp();
 
   Future<void> _onRefresh() async {
     print("执行刷新");
@@ -38,23 +41,12 @@ class _MyTaskPageState extends State<MyTaskPage>
   Future<String> _getProjectColumns(int id, String status) async {
     final changeStatus;
     var _change;
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getColumns",
       "id": 887036325,
       "params": [id]
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
+    }));
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final projectColumns = json.decode(res);
@@ -84,23 +76,12 @@ class _MyTaskPageState extends State<MyTaskPage>
 
 //移动任务的位置，即实现任务状态的转换
   _moveTaskToOthers(int task_id, int project_id, int column_id) async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'POST', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "moveTaskToProject",
       "id": 15775829,
       "params": [task_id, project_id, 1, column_id]
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
+    }));
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
 
@@ -118,18 +99,10 @@ class _MyTaskPageState extends State<MyTaskPage>
   int count = 0;
   //得到所有项目的id
   _getProject() async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode(
-        {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212});
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    final response = await httpCode.requestHttpCode(json.encode({
+      "jsonrpc": "2.0", 
+      "method": "getAllProjects", 
+      "id": 2134420212}));
 
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
@@ -152,27 +125,15 @@ class _MyTaskPageState extends State<MyTaskPage>
 
   _getData(int id) async {
     //获得数据
-    final res;
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
+    final response = await httpCode.requestHttpCode(json.encode({
       "jsonrpc": "2.0",
       "method": "getBoard",
       "id": 827046470,
       "params": [id]
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    }));
 
     if (response.statusCode == 200) {
-      res = await response.stream.bytesToString();
-
+      final res = await response.stream.bytesToString();
       final tasks = json.decode(res); //得到数据
       final _tasks = []; //为了筛选出任务中不为空的而设置的变量
       List _content = tasks["result"][0]["columns"]; //为了计算长度而设置的List变量
@@ -187,7 +148,6 @@ class _MyTaskPageState extends State<MyTaskPage>
       List _list;
       setState(() {
         _list = _tasks;
-
         final taskAbout =
             _list.where((v) => v["owner_id"] == widget.user_id).toList();
         user_tasks.addAll(taskAbout);
