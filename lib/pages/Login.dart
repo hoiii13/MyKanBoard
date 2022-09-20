@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:board_app/component/requestNetwork.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -18,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController(); //输入框用户名内容监听
   final _passwordController = TextEditingController(); //输入框密码内容监听
   bool _showPassword = false;
+  RequestHttp httpCode = const RequestHttp();
 
 //用于遮挡密码
   void _passwordIcon() {
@@ -38,18 +40,11 @@ class _LoginPageState extends State<LoginPage> {
   
   List _allUsers = [];
   void _getAllUser() async{
-    var headers = {
-      'Authorization': 'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-      };
-      var request = http.Request('GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-      request.body = json.encode({
+        final response = await httpCode.requestHttpCode(json.encode({
         "jsonrpc": "2.0",
         "method": "getAllUsers",
         "id": 1438712131
-        });
-        request.headers.addAll(headers);
-        http.StreamedResponse response = await request.send();
+        }));
 
       if (response.statusCode == 200) {
         final res = await response.stream.bytesToString();
