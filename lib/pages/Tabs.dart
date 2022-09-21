@@ -11,7 +11,7 @@ class Tabs extends StatefulWidget {
   final index;
   final num;
   final username;
-  Tabs({Key? key, this.index = 0, this.num = 0, this.username = "yds"})
+  Tabs({Key? key, this.index = 0, this.num = 0, this.username})
       : super(key: key);
 
   @override
@@ -21,7 +21,7 @@ class Tabs extends StatefulWidget {
 class _TabsState extends State<Tabs> {
   Map _userInfo = {};
   String userInfo_id = "";
-  RequestHttp httpCode = const RequestHttp();
+  RequestHttp httpCode = RequestHttp();
 
   _getUser(String username) async {
     final response = await httpCode.requestHttpCode(json.encode({
@@ -56,8 +56,10 @@ class _TabsState extends State<Tabs> {
 
   @override
   void initState() {
-    String name = widget.username;
-    _getUser(name);
+    String? name = widget.username;
+    if(name != null) {
+      _getUser(name);
+    }
     super.initState();
   }
 

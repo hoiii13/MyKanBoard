@@ -1,53 +1,18 @@
-import 'package:board_app/routes/Routes.dart';
+
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
-import 'package:http/http.dart';
-
-class TestPage extends StatefulWidget {
-  const TestPage({ Key? key }) : super(key: key);
-
-  @override
-  _TestPageState createState() => _TestPageState();
-}
-
-class _TestPageState extends State<TestPage> {
-  void test() async {
-    String basicAuth = base64Encode(utf8.encode("yds:123456"));
-    Response r = await get(Uri.parse('http://43.154.142.249:18868/jsonrpc.php'),headers: <String, String>{'authorization': basicAuth});
-    print("111 = ${r.statusCode}");
-    print("222 = ${r.body}");
-  }
-  @override
-  void initState() {
-    //test();
-    super.initState();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("test"),),
-      body: Center(
-        child: ElevatedButton(onPressed: () {EolToast.toast(context, "str");}, child: Text("点击")),
-      ),
-    ); 
-  }
-}
-
-class EolToast {
+class ToastPosition {
   static OverlayEntry? overlayEntry;
-
-  static final EolToast _showToast = EolToast._internal();
-  factory EolToast() {
+  static final ToastPosition _showToast = ToastPosition._internal();
+  factory ToastPosition() {
     return _showToast;
   }
-  EolToast._internal();
-
+  ToastPosition._internal();
   static toast(context, String str) {
     if (overlayEntry != null) return;
     overlayEntry = OverlayEntry(builder: (context) {
       return Positioned(
-        top: MediaQuery.of(context).size.height * 0.7,
+        top: MediaQuery.of(context).size.height * 0.8,
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -56,7 +21,7 @@ class EolToast {
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 10,horizontal: 30),
               decoration: BoxDecoration(
-                color: Colors.black,
+                color: Colors.grey,
                 borderRadius: BorderRadius.all(Radius.circular(30)),
               ),
               constraints: BoxConstraints(
@@ -80,4 +45,4 @@ class EolToast {
       overlayEntry = null;
     });
   }
-}
+  }

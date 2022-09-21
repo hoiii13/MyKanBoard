@@ -37,7 +37,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  RequestHttp httpCode = const RequestHttp();
+  RequestHttp httpCode = RequestHttp();
 
   List AllComments = [];
 

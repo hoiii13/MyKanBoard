@@ -9,7 +9,7 @@ import 'package:board_app/component/requestNetwork.dart';
 class MyMessagePage extends StatefulWidget {
   final user_id;
   final username;
-  MyMessagePage({Key? key, required this.user_id, this.username})
+  MyMessagePage({Key? key, this.user_id, this.username})
       : super(key: key);
 
   @override
@@ -17,7 +17,7 @@ class MyMessagePage extends StatefulWidget {
 }
 
 class _MyMessagePageState extends State<MyMessagePage> {
-  RequestHttp httpCode = const RequestHttp();
+  RequestHttp httpCode = RequestHttp();
 
   List _messageList = [];
   List _TaskDetails = [];
@@ -123,11 +123,15 @@ class _MyMessagePageState extends State<MyMessagePage> {
   @override
   Widget build(BuildContext context) {
     //筛选出@当前用户的
-    _messageList = _AllComments.where((v) =>
+    if(_AllComments.isNotEmpty) {
+      _messageList = _AllComments.where((v) =>
         v["comment"].contains("@" + widget.username + " ") == true ||
         v["comment"].contains("@" + widget.username) == true).toList();
     _messageList.sort(
         (a, b) => b["date_modification"].compareTo(a["date_modification"]));
+    } else {
+      _messageList = [];
+    }
 
     return Scaffold(
       appBar: AppBar(

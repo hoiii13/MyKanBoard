@@ -25,7 +25,7 @@ class _MyTaskPageState extends State<MyTaskPage>
   List toDos2 = [];
   late AnimationController _animateController;
   
-  RequestHttp httpCode = const RequestHttp();
+  RequestHttp httpCode = RequestHttp();
 
   Future<void> _onRefresh() async {
     print("执行刷新");

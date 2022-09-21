@@ -27,7 +27,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
   String _createUser = " ";
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-      RequestHttp httpCode = const RequestHttp();
+      RequestHttp httpCode = RequestHttp();
 
   void _getCreateTasksUser(int id) async {
 
@@ -266,7 +266,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                     ),
                     Padding(
                       //显示创建人员的头像
-                      padding: EdgeInsets.only(left: 20),
+                      padding: EdgeInsets.fromLTRB(20, 0, 0, 20),
                       child: CircleAvatar(
                         child: Text(
                           "${_createUser.toString().substring(0, 1)}", //取名字的前2个字

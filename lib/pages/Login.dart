@@ -1,11 +1,11 @@
-import 'dart:typed_data';
-
 import 'package:board_app/pages/Tabs.dart';
+import 'package:board_app/routes/Routes.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:board_app/component/requestNetwork.dart';
+import 'package:board_app/component/toastPosition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -19,7 +19,8 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController(); //输入框用户名内容监听
   final _passwordController = TextEditingController(); //输入框密码内容监听
   bool _showPassword = false;
-  RequestHttp httpCode = const RequestHttp();
+  RequestHttp httpCode = RequestHttp();
+  String hintName = "用户名";
 
 //用于遮挡密码
   void _passwordIcon() {
@@ -27,41 +28,68 @@ class _LoginPageState extends State<LoginPage> {
       _showPassword = !_showPassword;
     });
   }
-  String encodeBase64(String data) {
-    var content = utf8.encode(data);
-    var digest = base64Encode(content);
-    return digest;
+
+//存储token
+  saveData(String password) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool pasToken = await prefs.setString('password', password);
+    print("ppp = $pasToken");
   }
 
-  String decodeBase64(String data) {
-    return String.fromCharCodes(base64Decode(data));
+//读存储的token
+  readData(String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final passwordKey = await prefs.getString(password);
+    if(passwordKey != null) {
+      final loginMess = await _loginVerify(passwordKey);
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+        builder: (BuildContext context) => Tabs(username: loginMess["username"])), 
+        (route) => false);
+    }
+    //return passwordKey;
+    print("pass = $passwordKey");
   }
 
-  
-  List _allUsers = [];
-  void _getAllUser() async{
-        final response = await httpCode.requestHttpCode(json.encode({
+  deleteData(String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final result = await prefs.remove(password);
+    print("delete = $result");
+  }
+  Future _loginVerify(String baseCode) async{
+    Map? _userMessage;
+    var headers = {
+      'Authorization': 'Basic ' + baseCode,
+      'Content-Type': 'application/json',
+      'Cookie': 'KB_SID=dq9v0kf4822r9dg9tm5u0l8etp'
+      };
+      var request = http.Request('POST', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
+      request.body = json.encode({
         "jsonrpc": "2.0",
-        "method": "getAllUsers",
-        "id": 1438712131
-        }));
-
+        "method": "getMe",
+        "id": 1718627783
+        });
+        request.headers.addAll(headers);
+        http.StreamedResponse response = await request.send();
       if (response.statusCode == 200) {
         final res = await response.stream.bytesToString();
-        final getAll = json.decode(res);
-        _allUsers = getAll["result"];
+        final userMess = json.decode(res);
+        setState(() {
+          _userMessage = userMess["result"];
+        });
       }
       else {
         print(response.reasonPhrase);
+        _userMessage = null;
       }
+      return _userMessage;
 
   }
-
   @override
   void initState() {
-    print("3333 = ${encodeBase64("123456")}");
-    //print("dddd = ${decodeBase64("$2y$10$OFUT6f9BC6AsAv/u7ajK7e9pZW5/AKHDp.TL9t/327oaIBaq.NVAK")}");
-    _getAllUser();
+    readData("password");
+    //String? readPassword = readData("password");
+    //print("resd = ${readPassword}");
+    //saveData();
     super.initState();
   }
 
@@ -87,20 +115,20 @@ class _LoginPageState extends State<LoginPage> {
                  //autofocus: true,
                  controller: _usernameController,
                  cursorColor: Colors.red,
-                 decoration: const InputDecoration(
-                   border: OutlineInputBorder(
+                 decoration:  InputDecoration(
+                   border: const OutlineInputBorder(
                      borderSide: BorderSide(
                        color: Colors.red,
                        width: 3,
                        style: BorderStyle.solid
                      )
                    ),
-                   labelText: "用户名",
-                   labelStyle: TextStyle(color: Colors.red, fontSize: 16),
-                   enabledBorder: OutlineInputBorder(
+                   labelText: hintName,
+                   labelStyle: const TextStyle(color: Colors.red, fontSize: 16),
+                   enabledBorder: const OutlineInputBorder(
                      borderSide: BorderSide(color: Colors.red)
                    ),
-                   focusedBorder: OutlineInputBorder(
+                   focusedBorder: const OutlineInputBorder(
                      borderSide: BorderSide(
                        color: Colors.red
                      )
@@ -109,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                    ),
                   
                   ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 40),
 
                 TextField(
                  controller: _passwordController,
@@ -150,33 +178,31 @@ class _LoginPageState extends State<LoginPage> {
                     width: 330,
                     height: 50,
                     child: ElevatedButton(
-                    onPressed: (){
+                    onPressed: () async {
                       String name = _usernameController.text;
-                      int num = 0;
-                      /* Navigator.pushReplacementNamed(context, "/", arguments: {
-                        "username": _usernameController.text
-                      }); */
-                      Navigator.pop(context);
-                      Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => Tabs(username: _usernameController.text)));
-                      
-                      /* for(var i = 0; i < _allUsers.length; i++) {
-                        if(_allUsers[i]["username"] == _usernameController && _allUsers[i]["password"] == _passwordController) {
-                          Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => Tabs(username: _passwordController)));
-                        } else {
-                          print("??? = ${_allUsers[i]["username"]}, ${_allUsers[i]["password"]}");
-                          //print(".... = ${EncrytData")
-                          num++;
-                        }
+                      String password = _passwordController.text;
+                      if(name.isEmpty || password.isEmpty) {
+                        ToastPosition.toast(context, "用户名/密码不能为空");
+                      } else {
+                        String textUser = base64Encode(utf8.encode("$name:$password"));
+                        final loginMess = await _loginVerify(textUser);
+                        if(loginMess != null) {
+                          saveData(textUser);
+                        print("login = ${loginMess["id"]}");
+                          saveData(textUser);
+                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                            builder: (BuildContext context) => Tabs(username: _usernameController.text)), 
+                            (route) => false);
+                            ToastPosition.toast(context, "登陆成功");
+                            } else {
+                              _passwordController.clear();
+                              ToastPosition.toast(context, "用户名/密码错误");
                       }
-                      if(num == _allUsers.length) {
-                        print("nonono");
-                      } */
+                      }
                     }, 
-                    child: Text("登陆", style: TextStyle(color: Colors.red, fontSize: 18),)
+                    child: Text("登陆", style: TextStyle(color: Colors.red, fontSize: 18),),
                     ),
-                  )
+                  ),
              ],
            ),
          )
@@ -186,3 +212,5 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+
