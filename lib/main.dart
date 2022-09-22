@@ -4,7 +4,6 @@ import 'package:board_app/routes/Routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'colorAbout/color.dart';
-import 'res/task.dart';
 import 'package:date_format/date_format.dart';
 import 'package:board_app/pages/testpage.dart';
 
