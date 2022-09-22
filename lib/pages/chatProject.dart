@@ -49,7 +49,9 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
       "method": "getAllComments",
       "id": 148484683,
       "params": {"task_id": task_id}
-    }));
+    }),
+    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
+    );
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -77,7 +79,9 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
         "user_id": user_id,
         "content": content,
       }
-    }));
+    }),
+    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
+    );
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -100,7 +104,9 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
       "method": "getComment",
       "id": 867839500,
       "params": {"comment_id": commtent_id}
-    }));
+    }),
+    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
+    );
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -131,7 +137,9 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
       "method": "getProjectUsers",
       "id": 1601016721,
       "params": [project_id]
-    }));
+    }),
+    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
+    );
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -165,7 +173,9 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
       "method": "getUser",
       "id": 1769674781,
       "params": {"user_id": user_id}
-    }));
+    }),
+    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
+    );
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();

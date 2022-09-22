@@ -36,7 +36,9 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
       "method": "getUser",
       "id": 1769674781,
       "params": {"user_id": id}
-    }));
+    }),
+    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
+    );
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -47,7 +49,9 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
       } else
         createUser = userDetail["result"]["name"];
       setState(() {
-        _createUser = createUser;
+        if(mounted) {
+          _createUser = createUser;
+        }
       });
     } else {
       print(response.reasonPhrase);
@@ -60,7 +64,6 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
     /* _getCreateUser(); */
     int id = int.parse(widget.taskDetail["creator_id"]);
     _getCreateTasksUser(id);
-
     super.initState();
   }
 

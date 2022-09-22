@@ -9,8 +9,7 @@ import 'package:board_app/component/requestNetwork.dart';
 class MyMessagePage extends StatefulWidget {
   final user_id;
   final username;
-  MyMessagePage({Key? key, this.user_id, this.username})
-      : super(key: key);
+  MyMessagePage({Key? key, this.user_id, this.username}) : super(key: key);
 
   @override
   State<MyMessagePage> createState() => _MyMessagePageState();
@@ -35,11 +34,10 @@ class _MyMessagePageState extends State<MyMessagePage> {
   List Allprojects = [];
   //得到所有项目的id
   _getProject() async {
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0", 
-      "method": "getAllProjects", 
-      "id": 2134420212})
-    );
+    final response = await httpCode.requestHttpCode(
+        json.encode(
+            {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212}),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
       throw ("error");
@@ -59,12 +57,14 @@ class _MyMessagePageState extends State<MyMessagePage> {
   //得到所有项目中的任务
   _getData(int id) async {
     //获得数据
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getBoard",
-      "id": 827046470,
-      "params": [id]
-    }));
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getBoard",
+          "id": 827046470,
+          "params": [id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -93,12 +93,14 @@ class _MyMessagePageState extends State<MyMessagePage> {
 //根据所有任务得到所有评论
   List _AllComments = [];
   _getComments(int task_id) async {
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getAllComments",
-      "id": 148484683,
-      "params": {"task_id": task_id}
-    }));
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getAllComments",
+          "id": 148484683,
+          "params": {"task_id": task_id}
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final comments = json.decode(res);
@@ -123,12 +125,12 @@ class _MyMessagePageState extends State<MyMessagePage> {
   @override
   Widget build(BuildContext context) {
     //筛选出@当前用户的
-    if(_AllComments.isNotEmpty) {
+    if (_AllComments.isNotEmpty) {
       _messageList = _AllComments.where((v) =>
-        v["comment"].contains("@" + widget.username + " ") == true ||
-        v["comment"].contains("@" + widget.username) == true).toList();
-    _messageList.sort(
-        (a, b) => b["date_modification"].compareTo(a["date_modification"]));
+          v["comment"].contains("@" + widget.username + " ") == true ||
+          v["comment"].contains("@" + widget.username) == true).toList();
+      _messageList.sort(
+          (a, b) => b["date_modification"].compareTo(a["date_modification"]));
     } else {
       _messageList = [];
     }
@@ -138,7 +140,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
         centerTitle: true, //标题居中
         title: const Text(
           "我的消息",
-          style: TextStyle(fontSize: 14, color: Colors.black),
+          style: TextStyle(fontSize: 15, color: Colors.black),
         ),
         elevation: 0.5, //阴影高度
       ),

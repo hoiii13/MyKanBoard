@@ -8,9 +8,10 @@ import 'res/task.dart';
 import 'package:date_format/date_format.dart';
 import 'package:board_app/pages/testpage.dart';
 
-
 void main() {
   runApp(const MyApp());
+  Map a = {"2": "1234", "22": "555", "99": "9999"};
+  print("qq = ${a[1]}");
 }
 
 class MyApp extends StatelessWidget {

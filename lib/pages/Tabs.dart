@@ -1,17 +1,20 @@
 import 'package:board_app/pages/tabs/MyCenter.dart';
 import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:board_app/pages/tabs/MyTask.dart';
-import 'package:board_app/pages/tabs/ProjectAbout.dart';
+import 'package:board_app/pages/tabs/MyProject.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:board_app/component/requestNetwork.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:board_app/pages/Login.dart';
 
 class Tabs extends StatefulWidget {
   final index;
   final num;
   final username;
-  Tabs({Key? key, this.index = 0, this.num = 0, this.username})
+  final token;
+  Tabs({Key? key, this.index = 0, this.num = 0, this.username, this.token})
       : super(key: key);
 
   @override
@@ -24,12 +27,14 @@ class _TabsState extends State<Tabs> {
   RequestHttp httpCode = RequestHttp();
 
   _getUser(String username) async {
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getUserByName",
-      "id": 1769674782,
-      "params": {"username": username}
-    }));
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getUserByName",
+          "id": 1769674782,
+          "params": {"username": username}
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -39,9 +44,6 @@ class _TabsState extends State<Tabs> {
         print("_userInfo = ${_userInfo["id"]}");
       });
       userInfo_id = _userInfo["id"];
-      /* if (_userInfo["id"] is String) {
-        print("yesssss");
-      } */
     } else {
       print(response.reasonPhrase);
     }
@@ -53,11 +55,32 @@ class _TabsState extends State<Tabs> {
     //初始化_currentIndex
     _currentIndex = index;
   }
+  //删除存储下来的token（退出登陆）
+  deleteData(String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final result = await prefs.remove(password);
+    if (result) {
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+          (route) => false);
+    }
+    print("delete = $result");
+  }
 
   @override
   void initState() {
+    print("token = ${widget.token}");
+    if (widget.token != null) {
+      Future.delayed(Duration(days: 7), () {
+        deleteData("password");
+        print("我执行了");
+      });
+    } else {
+      print("没有token");
+    }
+
     String? name = widget.username;
-    if(name != null) {
+    if (name != null) {
       _getUser(name);
     }
     super.initState();
@@ -71,8 +94,8 @@ class _TabsState extends State<Tabs> {
           user_id: _userInfo["id"], username: _userInfo["username"]), //我的任务
       MyMessagePage(
           user_id: _userInfo["id"], username: _userInfo["username"]), //我的消息
-      ProjectAboutpage(), //项目
-      MyCenterPage() //个人中心
+      ProjectAboutpage(username: widget.username, userToken: widget.token), //项目
+      MyCenterPage(username: widget.username, userToken: widget.token) //个人中心
     ];
     return Scaffold(
       body: _pageList[

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:board_app/pages/MyTaskDetail.dart';
-import 'package:board_app/pages/tabs/ProjectAbout.dart';
+import 'package:board_app/pages/tabs/MyProject.dart';
 import 'package:board_app/routes/Routes.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -24,7 +24,7 @@ class _MyTaskPageState extends State<MyTaskPage>
   List toDos1 = [];
   List toDos2 = [];
   late AnimationController _animateController;
-  
+
   RequestHttp httpCode = RequestHttp();
 
   Future<void> _onRefresh() async {
@@ -41,12 +41,14 @@ class _MyTaskPageState extends State<MyTaskPage>
   Future<String> _getProjectColumns(int id, String status) async {
     final changeStatus;
     var _change;
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getColumns",
-      "id": 887036325,
-      "params": [id]
-    }));
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getColumns",
+          "id": 887036325,
+          "params": [id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final projectColumns = json.decode(res);
@@ -76,12 +78,14 @@ class _MyTaskPageState extends State<MyTaskPage>
 
 //移动任务的位置，即实现任务状态的转换
   _moveTaskToOthers(int task_id, int project_id, int column_id) async {
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "moveTaskToProject",
-      "id": 15775829,
-      "params": [task_id, project_id, 1, column_id]
-    }));
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "moveTaskToProject",
+          "id": 15775829,
+          "params": [task_id, project_id, 1, column_id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
 
@@ -99,10 +103,10 @@ class _MyTaskPageState extends State<MyTaskPage>
   int count = 0;
   //得到所有项目的id
   _getProject() async {
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0", 
-      "method": "getAllProjects", 
-      "id": 2134420212}));
+    final response = await httpCode.requestHttpCode(
+        json.encode(
+            {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212}),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
@@ -115,22 +119,26 @@ class _MyTaskPageState extends State<MyTaskPage>
       return Projects(project_id: row["id"]);
     }).toList();
     setState(() {
-      Allprojects = _projects;
-      //print("## = ${Allprojects}");
-      for (var i = 0; i < Allprojects.length; i++) {
-        _getData(int.parse(Allprojects[i].project_id));
+      if (mounted) {
+        Allprojects = _projects;
+        //print("## = ${Allprojects}");
+        for (var i = 0; i < Allprojects.length; i++) {
+          _getData(int.parse(Allprojects[i].project_id));
+        }
       }
     });
   }
 
   _getData(int id) async {
     //获得数据
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getBoard",
-      "id": 827046470,
-      "params": [id]
-    }));
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getBoard",
+          "id": 827046470,
+          "params": [id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -146,16 +154,18 @@ class _MyTaskPageState extends State<MyTaskPage>
         }
       }
       List _list;
-      setState(() {
-        _list = _tasks;
-        final taskAbout =
-            _list.where((v) => v["owner_id"] == widget.user_id).toList();
-        user_tasks.addAll(taskAbout);
+      if (mounted) {
+        setState(() {
+          _list = _tasks;
+          final taskAbout =
+              _list.where((v) => v["owner_id"] == widget.user_id).toList();
+          user_tasks.addAll(taskAbout);
 
-        toDos0 = user_tasks.where((v) => v["column_name"] == "待办").toList();
-        toDos1 = user_tasks.where((v) => v["column_name"] == "进行中").toList();
-        toDos2 = user_tasks.where((v) => v["column_name"] == "完成").toList();
-      });
+          toDos0 = user_tasks.where((v) => v["column_name"] == "待办").toList();
+          toDos1 = user_tasks.where((v) => v["column_name"] == "进行中").toList();
+          toDos2 = user_tasks.where((v) => v["column_name"] == "完成").toList();
+        });
+      }
     } else {
       print(response.reasonPhrase);
     }
@@ -186,7 +196,7 @@ class _MyTaskPageState extends State<MyTaskPage>
           appBar: AppBar(
             centerTitle: true, //标题居中
             title: Text("我的任务",
-                style: TextStyle(fontSize: 14, color: Colors.black)),
+                style: TextStyle(fontSize: 15, color: Colors.black)),
             elevation: 0.5, //阴影高度
             //shadowColor: Colors.red,
             bottom: TabBar(
