@@ -217,6 +217,7 @@ class _MyCenterPageState extends State<MyCenterPage> {
                               ? Text("无")
                               : Text("${_userMessage["email"]}"),
                         ),
+                        const Divider(),
                         ListTile(
                           leading: const Icon(
                             Icons.emoji_people,

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:convert';
+import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/chatProject.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -27,18 +28,18 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
   String _createUser = " ";
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-      RequestHttp httpCode = RequestHttp();
+  RequestHttp httpCode = RequestHttp();
+  TimeChange timeChange = TimeChange();
 
   void _getCreateTasksUser(int id) async {
-
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getUser",
-      "id": 1769674781,
-      "params": {"user_id": id}
-    }),
-    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
-    );
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getUser",
+          "id": 1769674781,
+          "params": {"user_id": id}
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -49,7 +50,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
       } else
         createUser = userDetail["result"]["name"];
       setState(() {
-        if(mounted) {
+        if (mounted) {
           _createUser = createUser;
         }
       });
@@ -182,7 +183,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                                 TextStyle(color: Colors.black45, fontSize: 15),
                           )
                         : Text(
-                            "${DateTime.fromMillisecondsSinceEpoch(int.parse(widget.taskDetail["date_started"]) * 1000).toString().substring(0, 16)}",
+                            "${timeChange.timeStamp(widget.taskDetail["date_started"])}",
                             style:
                                 TextStyle(color: Colors.black45, fontSize: 15),
                           ),
@@ -204,7 +205,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                                 TextStyle(color: Colors.black45, fontSize: 15),
                           )
                         : Text(
-                            "${DateTime.fromMillisecondsSinceEpoch(int.parse(widget.taskDetail["date_due"]) * 1000).toString().substring(0, 16)}",
+                            "${timeChange.timeStamp(widget.taskDetail["date_due"])}",
                             style:
                                 TextStyle(color: Colors.black45, fontSize: 15),
                           ),

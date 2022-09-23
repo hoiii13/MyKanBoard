@@ -1,3 +1,4 @@
+import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
 import 'package:board_app/pages/chatProject.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class MyMessagePage extends StatefulWidget {
 
 class _MyMessagePageState extends State<MyMessagePage> {
   RequestHttp httpCode = RequestHttp();
+  TimeChange timeChange = TimeChange();
 
   List _messageList = [];
   List _TaskDetails = [];
@@ -240,16 +242,6 @@ class _MyMessagePageState extends State<MyMessagePage> {
                                     style: TextStyle(color: Colors.red),
                                   ),
                                   onPressed: () {
-                                    /* Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => ChatProjectPage(
-                                          task_id: _messageList[index]
-                                              ["task_id"],
-                                          user_id: widget.user_id,
-                                          project_title: _TaskDetails[index]
-                                              ["title"],
-                                          project_id: _TaskDetails[index]
-                                              ["project_id"],
-                                        ))); */
                                     print("test = ${_TaskDetails[0]}");
                                     Navigator.of(context).push(
                                         MaterialPageRoute(
@@ -298,7 +290,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
                       Container(
                         margin: EdgeInsets.all(10),
                         child: Text(
-                          "评论时间：${DateTime.fromMillisecondsSinceEpoch(int.parse(messageList[index]["date_modification"]) * 1000).toString().substring(0, 16)}",
+                          "评论时间：${timeChange.timeStamp(messageList[index]["date_modification"])}",
                           style: TextStyle(color: Colors.grey, fontSize: 12),
                         ),
                       ),

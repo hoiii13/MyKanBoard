@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
 import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:flutter/material.dart';
@@ -44,14 +45,14 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
   List sendComment = [];
   //根据任务得到这个任务的所有评论记录
   Future<List> _getComments(int task_id) async {
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getAllComments",
-      "id": 148484683,
-      "params": {"task_id": task_id}
-    }),
-    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
-    );
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getAllComments",
+          "id": 148484683,
+          "params": {"task_id": task_id}
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -70,18 +71,18 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 //添加评论
   Future<int> _sendComment(int task_id, int user_id, String content) async {
     int? text_id;
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "createComment",
-      "id": 1580417921,
-      "params": {
-        "task_id": task_id,
-        "user_id": user_id,
-        "content": content,
-      }
-    }),
-    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
-    );
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "createComment",
+          "id": 1580417921,
+          "params": {
+            "task_id": task_id,
+            "user_id": user_id,
+            "content": content,
+          }
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -99,14 +100,14 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 
 //得到将新添加的评论的id然后添加到评论的List中
   _getSendText(int commtent_id) async {
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getComment",
-      "id": 867839500,
-      "params": {"comment_id": commtent_id}
-    }),
-    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
-    );
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getComment",
+          "id": 867839500,
+          "params": {"comment_id": commtent_id}
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -132,14 +133,14 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     Map _allProjectUsers = {};
     List users = [];
     List AllUsers = [];
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getProjectUsers",
-      "id": 1601016721,
-      "params": [project_id]
-    }),
-    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
-    );
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getProjectUsers",
+          "id": 1601016721,
+          "params": [project_id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -168,14 +169,14 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 //根据user_id得到用户的信息
   Future<Map> _getUsers(int user_id) async {
     Map _user = {};
-    final response = await httpCode.requestHttpCode(json.encode({
-      "jsonrpc": "2.0",
-      "method": "getUser",
-      "id": 1769674781,
-      "params": {"user_id": user_id}
-    }),
-    "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM="
-    );
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getUser",
+          "id": 1769674781,
+          "params": {"user_id": user_id}
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -293,6 +294,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           )),
     );
   }
+
 //评论内容
   StreamBuilder<List> buildChatStream() {
     return StreamBuilder(
@@ -336,8 +338,6 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           //return chatView(snapshot.data, widget.user_id);
         });
   }
-
-
 
 //输入框
   Widget inputView() {
@@ -501,6 +501,7 @@ class BubbleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TimeChange timeChange = TimeChange();
     final _width = MediaQuery.of(context).size.width; //得到屏幕的宽
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -558,7 +559,7 @@ class BubbleWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.only(top: 5),
                 child: Text(
-                  "${DateTime.fromMillisecondsSinceEpoch(int.parse(time) * 1000).toString().substring(0, 16)}",
+                  "${timeChange.timeStamp(time)}",
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               )

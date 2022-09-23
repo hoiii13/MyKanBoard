@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
 import 'package:board_app/pages/tabs/MyProject.dart';
 import 'package:board_app/routes/Routes.dart';
@@ -26,6 +27,8 @@ class _MyTaskPageState extends State<MyTaskPage>
   late AnimationController _animateController;
 
   RequestHttp httpCode = RequestHttp();
+
+  TimeChange timeChange = TimeChange();
 
   Future<void> _onRefresh() async {
     print("执行刷新");
@@ -262,7 +265,7 @@ class _MyTaskPageState extends State<MyTaskPage>
                 subtitle: toDos[index]["date_due"] == "0"
                     ? Text("截止时间: 未设置", style: TextStyle(fontSize: 13))
                     : Text(
-                        "截止时间:${DateTime.fromMillisecondsSinceEpoch(int.parse(toDos[index]["date_due"]) * 1000).toString().substring(0, 16)}",
+                        "截止时间:${timeChange.timeStamp(toDos[index]["date_due"])}",
                         style: TextStyle(fontSize: 13)),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
