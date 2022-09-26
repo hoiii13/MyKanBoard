@@ -176,7 +176,8 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                       "开始时间:",
                       style: TextStyle(color: Colors.black, fontSize: 15),
                     ),
-                    trailing: widget.taskDetail["date_started"] == "0"
+                    trailing: widget.taskDetail["date_started"] == "0" ||
+                            widget.taskDetail["date_started"] == null
                         ? Text(
                             "0000-00-00",
                             style:
@@ -198,7 +199,8 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                       "结束时间:",
                       style: TextStyle(color: Colors.black, fontSize: 15),
                     ),
-                    trailing: widget.taskDetail["date_due"] == "0"
+                    trailing: widget.taskDetail["date_due"] == "0" ||
+                            widget.taskDetail["date_due"] == null
                         ? Text(
                             "0000-00-00",
                             style:

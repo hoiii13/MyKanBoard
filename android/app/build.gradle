@@ -40,10 +40,19 @@ android {
         applicationId "com.example.board_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 17
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        compileSdkVersion 33
+
+        manifestPlaceholders = [
+            JPUSH_PKGNAME : applicationId,
+            JPUSH_APPKEY : "e36315a8b61572f70978d86b",
+            JPUSH_CHANNEL : "developer-default",
+            applicationName : "com.example.board_app.Application",
+            appAuthRedirectScheme : "com.example.board_app",
+        ]
     }
 
     buildTypes {

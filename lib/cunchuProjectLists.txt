@@ -23,20 +23,10 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
   List projectColumns = [];
   List _taskLists = [];
   List columnTitle2 = [];
+  List<PopupMenuEntry<dynamic>> list = [];
   bool _isClick = false;
   bool status = false;
   int num = 0;
-
-  Future<void> _onRefresh() async {
-    print("执行刷新");
-    columnTitles.clear();
-    columnIds.clear();
-    projectColumns.clear();
-    _taskLists.clear();
-    columnTitle2.clear();
-    _getBoards(int.parse(widget.project_id));
-    await Future.delayed(Duration(seconds: 2), () {});
-  }
 
   //项目看板内容
   _getBoards(int project_id) async {
@@ -91,6 +81,61 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
     return username;
   }
 
+  /* //通过项目的id来得到这个项目中所含有的列的信息
+  Future<String> _getProjectColumns(int id, String status) async {
+    final changeStatus;
+    var _change;
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getColumns",
+          "id": 887036325,
+          "params": [id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+    if (response.statusCode == 200) {
+      final res = await response.stream.bytesToString();
+      final projectColumns = json.decode(res);
+
+      List _projectColumns =
+          projectColumns["result"];
+
+      int len = _projectColumns.length;
+
+      for (var i = 0; i < len; i++) {
+        if (_projectColumns[i].column_title == status) {
+          _change = _projectColumns[i].column_id;
+          break;
+        }
+      }
+    } else {
+      print(response.reasonPhrase);
+      throw ("error");
+    }
+    return _change;
+  } */
+
+  _getColumn(int column_id) async {
+    Map _column = {};
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getColumn",
+          "id": 1242049935,
+          "params": [column_id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+
+    if (response.statusCode == 200) {
+      final res = await response.stream.bytesToString();
+      final column = json.decode(res);
+      _column = column["result"];
+    } else {
+      print(response.reasonPhrase);
+    }
+    return _column;
+  }
+
   _moveTaskToOthers(int task_id, int project_id, int column_id) async {
     final response = await httpCode.requestHttpCode(
         json.encode({
@@ -107,8 +152,9 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
       columnIds.clear();
       projectColumns.clear();
       _taskLists.clear();
+      list.clear();
       columnTitle2.clear();
-      _getBoards(int.parse(widget.project_id));
+      _getBoards(project_id);
     } else {
       print(response.reasonPhrase);
     }
@@ -127,58 +173,48 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
       _taskLists = projectColumns[num]["tasks"];
     }
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true, //标题居中
-        title: Text(
-          widget.title,
-          style: TextStyle(fontSize: 15, color: Colors.black),
+        appBar: AppBar(
+          centerTitle: true, //标题居中
+          title: Text(
+            widget.title,
+            style: TextStyle(fontSize: 15, color: Colors.black),
+          ),
+          elevation: 0.5, //阴影高度
         ),
-        elevation: 0.5, //阴影高度
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Center(
-              child: Container(
-                width: 300,
-                margin: EdgeInsets.only(top: 20),
-                alignment: Alignment.center,
-                color: Colors.grey[200],
-                child: ListTile(
-                  title: columnTitles.isEmpty
-                      ? Text("加载中...")
-                      : Text(columnTitles[num]),
-                  trailing: _isClick
-                      ? Icon(Icons.expand_more)
-                      : Icon(Icons.chevron_right),
-                  onTap: () {
-                    setState(() {
-                      _isClick = !_isClick;
-                    });
-                  },
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Center(
+                child: Container(
+                  width: 300,
+                  margin: EdgeInsets.only(top: 20),
+                  alignment: Alignment.center,
+                  color: Colors.grey[200],
+                  child: ListTile(
+                    title: columnTitles.isEmpty
+                        ? Text("加载中...")
+                        : Text(columnTitles[num]),
+                    trailing: _isClick
+                        ? Icon(Icons.expand_more)
+                        : Icon(Icons.chevron_right),
+                    onTap: () {
+                      setState(() {
+                        _isClick = !_isClick;
+                      });
+                    },
+                  ),
                 ),
               ),
-            ),
-            Container(
-              width: 300,
-              child: Divider(color: Colors.white),
-            ),
-            Stack(
-              children: [_buildTasksList(_taskLists), _buildColumns()],
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _onRefresh();
-        },
-        child: Icon(
-          Icons.refresh,
-          color: Colors.red,
-        ),
-      ),
-    );
+              Container(
+                width: 300,
+                child: Divider(color: Colors.white),
+              ),
+              Stack(
+                children: [_buildTasksList(_taskLists), _buildColumns()],
+              ),
+            ],
+          ),
+        ));
   }
 
   Widget _buildColumns() {
@@ -206,7 +242,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
                             });
                           },
                         ),
-                      ),
+                      )
                     ],
                   );
                 })),
@@ -235,7 +271,6 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
                       onTap: () async {
                         String name = await _getUser(
                             int.parse(tasksList[index]["owner_id"]));
-                        print("name =  ${tasksList[index]["owner_id"]}");
 
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => MyTaskDetailPage(
@@ -250,7 +285,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
 
                       print("$columnTitle2---$columnTitles");
                       onLongPress(context, globlePositionX, globlePositionY,
-                          tasksList[index], columnTitles, columnIds);
+                          tasksList[index], columnTitles, columnIds, index);
                     }),
                 const Divider()
               ]);
@@ -260,23 +295,22 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
   }
 
   void onLongPress(BuildContext context, double x, double y, final task,
-      List _columnTitles, final columnId) {
+      List columnTitles, final columnId, int index) {
     final RenderBox? overlay =
         Overlay.of(context)?.context.findRenderObject() as RenderBox;
     RelativeRect position = RelativeRect.fromRect(
         Rect.fromLTRB(x, y, x + 50, y + 50), Offset.zero & overlay!.size);
-    List<PopupMenuEntry<dynamic>> list = [];
+    /* final _columnsTitle = columnsTitle;
+    print("ooo = ${columnsTitle}"); */
+    //List<PopupMenuEntry<dynamic>> list = [];
     // _columnsTitle.removeAt(index);
-    print("ppppppp = ${_columnTitles[num]}");
     list.clear();
-    for (var i = 0; i < _columnTitles.length; i++) {
-      if (_columnTitles[num] != _columnTitles[i]) {
-        PopupMenuItem popupMenuItem = PopupMenuItem(
-          child: Text(_columnTitles[i]),
-          value: i,
-        );
-        list.add(popupMenuItem);
-      }
+    for (var i = 0; i < columnTitles.length; i++) {
+      PopupMenuItem popupMenuItem = PopupMenuItem(
+        child: Text(columnTitles[i]),
+        value: i,
+      );
+      list.add(popupMenuItem);
     }
     showMenu(context: context, position: position, items: list)
         .then((value) async {

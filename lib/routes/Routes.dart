@@ -1,5 +1,3 @@
-
-
 import 'package:board_app/pages/chatProject.dart';
 /* import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:board_app/pages/testNotice.dart'; */
@@ -10,6 +8,7 @@ import '../pages/testpage.dart';
 /* import '../pages/TestTime.dart';
 import '../pages/TestGongXiang.dart';
 import '../pages/chatProject.dart'; */
+import '../pages/testPush.dart';
 
 final routes = {
   '/': (context, {aguments}) => Tabs(),
@@ -23,8 +22,8 @@ final routes = {
           project_title: project_title,
           project_id: project_id),
   '/login': (context) => LoginPage(),
-  '/test': (context) => const TestPage()
-  
+  '/test': (context) => const TestPage(),
+  //'/push': (context) => TestPushPage()
 };
 
 var onGenerateRoute = (RouteSettings settings) {

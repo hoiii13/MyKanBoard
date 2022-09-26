@@ -16,17 +16,15 @@ class ProjectAboutpage extends StatefulWidget {
 class _ProjectAboutpageState extends State<ProjectAboutpage> {
   RequestHttp httpCode = RequestHttp();
   bool _isVisible = false;
-  List _myProjects = [];
+  Map _myProjects = {};
   List _projectIDs = [];
   List _projectTitles = [];
-  Map _userDetail = {};
-  List users = [];
 
   //得到与用户有关的所有项目的id和title
   void _getMyProjectList(String baseCode) async {
     final response = await httpCode.requestHttpCode(
         json.encode(
-            {"jsonrpc": "2.0", "method": "getmyProjects", "id": 2134420212}),
+            {"jsonrpc": "2.0", "method": "getMyProjectsList", "id": 987834805}),
         baseCode);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -34,52 +32,39 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
       if (mounted) {
         setState(() {
           _myProjects = myProjects["result"];
-          List a = _myProjects.map<ProjectAbout>((row) {
-            return ProjectAbout(owner_id: row["owner_id"]);
-          }).toList();
-          print("object == ${a}");
-          /* for (var i = 0; i < _myProjects.length; i++) {
-            print("test = ${_myProjects[i]["owner_id"]}");
-            _getUser(int.parse(_myProjects[i]["owner_id"]));
-          } */
-          /* _myProjects.forEach((key, value) {
+          _myProjects.forEach((key, value) {
             _projectIDs.add(key);
             _projectTitles.add(value);
-          }); */
+          });
         });
       }
+      print("== ${_myProjects}");
     } else {
       print(response.reasonPhrase);
     }
   }
 
-  _getUser(int user_id) async {
+//项目看板内容
+  _getBoards(int project_id) async {
     final response = await httpCode.requestHttpCode(
         json.encode({
           "jsonrpc": "2.0",
-          "method": "getUser",
-          "id": 1769674781,
-          "params": {"user_id": user_id}
+          "method": "getBoard",
+          "id": 827046470,
+          "params": [project_id]
         }),
         "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
-
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
-      final userDetail = json.decode(res);
-      _userDetail = userDetail["result"];
-      print("999 = ${_userDetail["username"]}");
-      setState(() {
-        users.add(_userDetail);
-        List s = users.map<UserAbout>((row) {
-          return UserAbout(username: row["username"]);
-        }).toList();
-        print("nnn = ${user_id} ${s}");
-        //print("users = ${users}");
-      });
+      final projectBoard = json.decode(res);
+      if (mounted) {
+        setState(() {
+          print("object = ${projectBoard["result"][0]["columns"][2]}");
+        });
+      }
     } else {
       print(response.reasonPhrase);
     }
-    // return _userDetail;
   }
 
   @override
@@ -91,9 +76,6 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
   @override
   Widget build(BuildContext context) {
     int num = 0;
-    for (var i = 0; i < _myProjects.length; i++) {
-      //_getUser(int.parse(_myProjects[i]["owner_id"]));
-    }
     final _width = MediaQuery.of(context).size.width; //得到屏幕的宽高
     return Scaffold(
       appBar: AppBar(
@@ -105,21 +87,17 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
         elevation: 0.5, //阴影高度
       ),
       body: ListView.builder(
-          itemCount: _myProjects.length,
+          itemCount: _projectTitles.length,
           itemBuilder: (context, index) {
-            //_getUser(int.parse(_myProjects[index]["owner_id"]));
             return Column(
               children: [
                 ListTile(
-                  title: Text(_myProjects[index]["name"]),
-                  subtitle: users.isEmpty
-                      ? Text("创建人：")
-                      : Text("创建人：${users[index]["username"]}"),
+                  title: Text(_projectTitles[index]),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => ProjectListsPage(
-                              project_id: _myProjects[index]["id"],
-                              title: _myProjects[index]["name"],
+                              project_id: _projectIDs[index],
+                              title: _projectTitles[index],
                             )));
                   },
                 ),
@@ -128,25 +106,5 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
             );
           }),
     );
-  }
-}
-
-class UserAbout {
-  final String username;
-  UserAbout({required this.username});
-
-  @override
-  String toString() {
-    return username;
-  }
-}
-
-class ProjectAbout {
-  final String owner_id;
-  ProjectAbout({required this.owner_id});
-
-  @override
-  String toString() {
-    return owner_id;
   }
 }

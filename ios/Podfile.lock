@@ -12,6 +12,13 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
+  - JCore (3.2.5)
+  - JPush (4.8.1):
+    - JCore (>= 2.0.0)
+  - jpush_flutter (0.0.2):
+    - Flutter
+    - JCore (= 3.2.5)
+    - JPush (= 4.8.1)
   - shared_preferences_ios (0.0.1):
     - Flutter
   - sqflite (0.0.2):
@@ -27,6 +34,7 @@ DEPENDENCIES:
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - jpush_flutter (from `.symlinks/plugins/jpush_flutter/ios`)
   - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
@@ -34,6 +42,8 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - FMDB
+    - JCore
+    - JPush
     - Toast
 
 EXTERNAL SOURCES:
@@ -47,6 +57,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
+  jpush_flutter:
+    :path: ".symlinks/plugins/jpush_flutter/ios"
   shared_preferences_ios:
     :path: ".symlinks/plugins/shared_preferences_ios/ios"
   sqflite:
@@ -61,6 +73,9 @@ SPEC CHECKSUMS:
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   fluttertoast: 16fbe6039d06a763f3533670197d01fc73459037
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  JCore: 4c9febdfdb1a5675ab361bc1f06c0905391d7b23
+  JPush: 2caabdb6d62d009bc07a9bd115d03c7c42512b5e
+  jpush_flutter: 3badd7fb60be478508730b46a701430be4d13c48
   shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196

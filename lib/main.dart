@@ -9,8 +9,6 @@ import 'package:board_app/pages/testpage.dart';
 
 void main() {
   runApp(const MyApp());
-  Map a = {"2": "1234", "22": "555", "99": "9999"};
-  print("qq = ${a[1]}");
 }
 
 class MyApp extends StatelessWidget {
