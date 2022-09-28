@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
-import 'package:board_app/pages/tabs/ProjectAbout.dart';
+import 'package:board_app/pages/tabs/MyProject.dart';
 import 'package:board_app/routes/Routes.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:board_app/component/requestNetwork.dart';
+import 'package:jpush_flutter/jpush_flutter.dart';
 
 //"我的任务"页面
 class MyTaskPage extends StatefulWidget {
@@ -18,11 +21,16 @@ class MyTaskPage extends StatefulWidget {
 
 class _MyTaskPageState extends State<MyTaskPage>
     with SingleTickerProviderStateMixin {
+  final JPush jpush = JPush();
   List user_tasks = [];
   List toDos0 = [];
   List toDos1 = [];
   List toDos2 = [];
   late AnimationController _animateController;
+
+  RequestHttp httpCode = RequestHttp();
+
+  TimeChange timeChange = TimeChange();
 
   Future<void> _onRefresh() async {
     print("执行刷新");
@@ -38,23 +46,14 @@ class _MyTaskPageState extends State<MyTaskPage>
   Future<String> _getProjectColumns(int id, String status) async {
     final changeStatus;
     var _change;
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
-      "jsonrpc": "2.0",
-      "method": "getColumns",
-      "id": 887036325,
-      "params": [id]
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getColumns",
+          "id": 887036325,
+          "params": [id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final projectColumns = json.decode(res);
@@ -84,23 +83,14 @@ class _MyTaskPageState extends State<MyTaskPage>
 
 //移动任务的位置，即实现任务状态的转换
   _moveTaskToOthers(int task_id, int project_id, int column_id) async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'POST', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
-      "jsonrpc": "2.0",
-      "method": "moveTaskToProject",
-      "id": 15775829,
-      "params": [task_id, project_id, 1, column_id]
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "moveTaskToProject",
+          "id": 15775829,
+          "params": [task_id, project_id, 1, column_id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
 
@@ -118,18 +108,10 @@ class _MyTaskPageState extends State<MyTaskPage>
   int count = 0;
   //得到所有项目的id
   _getProject() async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode(
-        {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212});
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    final response = await httpCode.requestHttpCode(
+        json.encode(
+            {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212}),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
@@ -142,37 +124,29 @@ class _MyTaskPageState extends State<MyTaskPage>
       return Projects(project_id: row["id"]);
     }).toList();
     setState(() {
-      Allprojects = _projects;
-      //print("## = ${Allprojects}");
-      for (var i = 0; i < Allprojects.length; i++) {
-        _getData(int.parse(Allprojects[i].project_id));
+      if (mounted) {
+        Allprojects = _projects;
+        //print("## = ${Allprojects}");
+        for (var i = 0; i < Allprojects.length; i++) {
+          _getData(int.parse(Allprojects[i].project_id));
+        }
       }
     });
   }
 
   _getData(int id) async {
     //获得数据
-    final res;
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
-      "jsonrpc": "2.0",
-      "method": "getBoard",
-      "id": 827046470,
-      "params": [id]
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getBoard",
+          "id": 827046470,
+          "params": [id]
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
-      res = await response.stream.bytesToString();
-
+      final res = await response.stream.bytesToString();
       final tasks = json.decode(res); //得到数据
       final _tasks = []; //为了筛选出任务中不为空的而设置的变量
       List _content = tasks["result"][0]["columns"]; //为了计算长度而设置的List变量
@@ -185,28 +159,65 @@ class _MyTaskPageState extends State<MyTaskPage>
         }
       }
       List _list;
-      setState(() {
-        _list = _tasks;
+      if (mounted) {
+        setState(() {
+          _list = _tasks;
+          final taskAbout =
+              _list.where((v) => v["owner_id"] == widget.user_id).toList();
+          user_tasks.addAll(taskAbout);
 
-        final taskAbout =
-            _list.where((v) => v["owner_id"] == widget.user_id).toList();
-        user_tasks.addAll(taskAbout);
-
-        toDos0 = user_tasks.where((v) => v["column_name"] == "待办").toList();
-        toDos1 = user_tasks.where((v) => v["column_name"] == "进行中").toList();
-        toDos2 = user_tasks.where((v) => v["column_name"] == "完成").toList();
-      });
+          toDos0 = user_tasks.where((v) => v["column_name"] == "待办").toList();
+          toDos1 = user_tasks.where((v) => v["column_name"] == "进行中").toList();
+          toDos2 = user_tasks.where((v) => v["column_name"] == "完成").toList();
+        });
+      }
     } else {
       print(response.reasonPhrase);
     }
   }
+  Future initJpush(String username) async {
+    jpush.applyPushAuthority(
+        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
+    jpush.getRegistrationID().then((rid) {
+      print("获得注册的id: $rid");
+    });
+
+    jpush.setup(
+        appKey: "e36315a8b61572f70978d86b",
+        channel: "thisChannel",
+        production: false,
+        debug: true);
+    jpush.setAlias(username).then((map) {
+      print("!!!!!!???????>>>>>>>>>>>>>>>>>>>>>>设置别名成功");
+    });
+
+    try {
+      jpush.addEventHandler(
+          onReceiveNotification: (Map<String, dynamic> message) async {
+        print("flutter onReceiveNotification: $message");
+      }, onOpenNotification: (Map<String, dynamic> message) async {
+        print("flutter onOpenNotification: $message");
+      }, onReceiveMessage: (Map<String, dynamic> message) async {
+        print("flutter onReceiveMessage: $message");
+      });
+    } catch (e) {
+      print("极光sdk配置异常");
+    }
+  }
+  
+
 
   List _myTask = [];
   late TabController tabController;
 
   @override
   void initState() {
+    
     _getProject();
+    String? name = widget.username;
+    if(name != null) {
+      initJpush(name);
+    }
 
     tabController = TabController(length: 3, vsync: this) //监听tabBar
       ..addListener(() {
@@ -214,7 +225,7 @@ class _MyTaskPageState extends State<MyTaskPage>
           print("tabController.index = ${tabController.index}");
         }
       });
-
+     
     super.initState();
   }
 
@@ -226,7 +237,7 @@ class _MyTaskPageState extends State<MyTaskPage>
           appBar: AppBar(
             centerTitle: true, //标题居中
             title: Text("我的任务",
-                style: TextStyle(fontSize: 14, color: Colors.black)),
+                style: TextStyle(fontSize: 15, color: Colors.black)),
             elevation: 0.5, //阴影高度
             //shadowColor: Colors.red,
             bottom: TabBar(
@@ -285,14 +296,16 @@ class _MyTaskPageState extends State<MyTaskPage>
           children: [
             GestureDetector(
               child: ListTile(
-                title: Text(
+                title: toDos.isEmpty ?
+                Text("加载中...")
+                :Text(
                   toDos[index]["title"],
                   style: TextStyle(fontSize: 15),
                 ),
                 subtitle: toDos[index]["date_due"] == "0"
                     ? Text("截止时间: 未设置", style: TextStyle(fontSize: 13))
                     : Text(
-                        "截止时间:${DateTime.fromMillisecondsSinceEpoch(int.parse(toDos[index]["date_due"]) * 1000).toString().substring(0, 16)}",
+                        "截止时间:${timeChange.timeStamp(toDos[index]["date_due"])}",
                         style: TextStyle(fontSize: 13)),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(

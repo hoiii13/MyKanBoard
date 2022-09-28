@@ -1,11 +1,13 @@
 import 'dart:math';
 import 'dart:convert';
+import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/chatProject.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../pages/tabs/MyTask.dart';
 import '../colorAbout/color.dart';
+import 'package:board_app/component/requestNetwork.dart';
 
 class MyTaskDetailPage extends StatefulWidget {
   final taskDetail;
@@ -26,24 +28,18 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
   String _createUser = " ";
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  RequestHttp httpCode = RequestHttp();
+  TimeChange timeChange = TimeChange();
 
   void _getCreateTasksUser(int id) async {
-    var headers = {
-      'Authorization':
-          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
-      'Content-Type': 'application/json'
-    };
-    var request = http.Request(
-        'GET', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
-    request.body = json.encode({
-      "jsonrpc": "2.0",
-      "method": "getUser",
-      "id": 1769674781,
-      "params": {"user_id": id}
-    });
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getUser",
+          "id": 1769674781,
+          "params": {"user_id": id}
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -54,9 +50,10 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
       } else
         createUser = userDetail["result"]["name"];
       setState(() {
-        _createUser = createUser;
+        if (mounted) {
+          _createUser = createUser;
+        }
       });
-      print("@! = ${createUser}");
     } else {
       print(response.reasonPhrase);
       throw ("error");
@@ -68,25 +65,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
     /* _getCreateUser(); */
     int id = int.parse(widget.taskDetail["creator_id"]);
     _getCreateTasksUser(id);
-    var andriod = AndroidInitializationSettings('@mipmap/ic_launcher');
-    var iOS = IOSInitializationSettings();
-    var initSettings = InitializationSettings(android: andriod, iOS: iOS);
-    flutterLocalNotificationsPlugin.initialize(initSettings,
-        onSelectNotification: onSelectNotification);
     super.initState();
-  }
-
-  Future onSelectNotification(String? payload) async {
-    debugPrint("payload: $payload");
-    Navigator.pushNamed(context, '/');
-  }
-
-  showNotification() async {
-    var andriod = AndroidNotificationDetails('channelId', 'channelName');
-    var iOS = IOSNotificationDetails();
-    var platform = NotificationDetails(android: andriod, iOS: iOS);
-    await flutterLocalNotificationsPlugin.show(0, '实验一', '这是一个test', platform,
-        payload: '通知栏');
   }
 
   @override
@@ -197,14 +176,15 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                       "开始时间:",
                       style: TextStyle(color: Colors.black, fontSize: 15),
                     ),
-                    trailing: widget.taskDetail["date_started"] == "0"
+                    trailing: widget.taskDetail["date_started"] == "0" ||
+                            widget.taskDetail["date_started"] == null
                         ? Text(
                             "0000-00-00",
                             style:
                                 TextStyle(color: Colors.black45, fontSize: 15),
                           )
                         : Text(
-                            "${DateTime.fromMillisecondsSinceEpoch(int.parse(widget.taskDetail["date_started"]) * 1000).toString().substring(0, 16)}",
+                            "${timeChange.timeStamp(widget.taskDetail["date_started"])}",
                             style:
                                 TextStyle(color: Colors.black45, fontSize: 15),
                           ),
@@ -219,14 +199,15 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                       "结束时间:",
                       style: TextStyle(color: Colors.black, fontSize: 15),
                     ),
-                    trailing: widget.taskDetail["date_due"] == "0"
+                    trailing: widget.taskDetail["date_due"] == "0" ||
+                            widget.taskDetail["date_due"] == null
                         ? Text(
                             "0000-00-00",
                             style:
                                 TextStyle(color: Colors.black45, fontSize: 15),
                           )
                         : Text(
-                            "${DateTime.fromMillisecondsSinceEpoch(int.parse(widget.taskDetail["date_due"]) * 1000).toString().substring(0, 16)}",
+                            "${timeChange.timeStamp(widget.taskDetail["date_due"])}",
                             style:
                                 TextStyle(color: Colors.black45, fontSize: 15),
                           ),
@@ -291,7 +272,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                     ),
                     Padding(
                       //显示创建人员的头像
-                      padding: EdgeInsets.only(left: 20),
+                      padding: EdgeInsets.fromLTRB(20, 0, 0, 20),
                       child: CircleAvatar(
                         child: Text(
                           "${_createUser.toString().substring(0, 1)}", //取名字的前2个字
