@@ -68,7 +68,8 @@ class _TabsState extends State<Tabs> {
     }
     print("delete = $result");
   }
-/* Future initJpush(String username) async {
+
+  Future initJpush(String username) async {
     jpush.applyPushAuthority(
         new NotificationSettingsIOS(sound: true, alert: true, badge: true));
     jpush.getRegistrationID().then((rid) {
@@ -97,7 +98,6 @@ class _TabsState extends State<Tabs> {
       print("极光sdk配置异常");
     }
   }
-   */
 
   @override
   void initState() {
@@ -114,9 +114,9 @@ class _TabsState extends State<Tabs> {
     String? name = widget.username;
     if (name != null) {
       _getUser(name);
-      //initJpush(name);
+      initJpush(name);
     }
-    
+
     super.initState();
   }
 
