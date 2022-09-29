@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
+import 'package:board_app/pages/chatProject.dart';
 import 'package:board_app/pages/tabs/MyProject.dart';
 import 'package:board_app/routes/Routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:board_app/component/requestNetwork.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
@@ -175,6 +177,7 @@ class _MyTaskPageState extends State<MyTaskPage>
       print(response.reasonPhrase);
     }
   }
+
   Future initJpush(String username) async {
     jpush.applyPushAuthority(
         new NotificationSettingsIOS(sound: true, alert: true, badge: true));
@@ -204,29 +207,72 @@ class _MyTaskPageState extends State<MyTaskPage>
       print("极光sdk配置异常");
     }
   }
-  
 
+//6022 alias 操作正在进行中，暂时不能进行其他 alias 操作 3.0.7 版本新增的错误码，
+//多次调用 alias 相关的 API，请在获取到上一次调用回调后再做下一次操作；在未取到回调的情况下，等待 20 秒后再做下一次操作。
 
+//6002 alias的接口调用频率是5s以上，低于5s就会报6002超时
+  Future initJpush(String aliasName) async {
+    jpush.applyPushAuthority(
+        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
+    //注册registerID
+    /* jpush.getRegistrationID().then((rid) {
+      print("获得注册的id: $rid");
+    }); */
+
+    jpush.setup(
+        appKey: "e36315a8b61572f70978d86b",
+        channel: "thisChannel",
+        production: false,
+        debug: true);
+    jpush.setAlias(aliasName).then((map) {
+      print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>设置别名成功");
+    });
+
+    try {
+      jpush.addEventHandler(
+          onReceiveNotification: (Map<String, dynamic> message) async {
+        print("flutter onReceiveNotification: $message");
+      },
+          //点击通知栏跳转到聊天页面
+          onOpenNotification: (Map<String, dynamic> message) async {
+        final res = message["extras"]["cn.jpush.android.EXTRA"];
+        final _extra = json.decode(res);
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => ChatProjectPage(
+                  task_id: _extra["task_id"],
+                  user_id: widget.user_id,
+                  task_title: message["title"],
+                  project_id: _extra["project_id"],
+                  username: widget.username,
+                )));
+        print("flutter onOpenNotification: $message");
+      }, onReceiveMessage: (Map<String, dynamic> message) async {
+        print("flutter onReceiveMessage: $message");
+      });
+    } catch (e) {
+      print("极光sdk配置异常");
+    }
+  }
 
   List _myTask = [];
   late TabController tabController;
 
   @override
   void initState() {
-    
     _getProject();
-    String? name = widget.username;
-    if(name != null) {
-      initJpush(name);
-    }
-
+    //String? name = widget.username;
+    Future.delayed(Duration(seconds: 1), () {
+      initJpush(widget.username);
+    });
+    //print("pppp = $name");
     tabController = TabController(length: 3, vsync: this) //监听tabBar
       ..addListener(() {
         if (tabController.index.toDouble() == tabController.animation!.value) {
           print("tabController.index = ${tabController.index}");
         }
       });
-     
+
     super.initState();
   }
 
@@ -297,12 +343,9 @@ class _MyTaskPageState extends State<MyTaskPage>
           children: [
             GestureDetector(
               child: ListTile(
-                title: toDos.isEmpty ?
-                Text("加载中...")
-                :Text(
-                  toDos[index]["title"],
-                  style: TextStyle(fontSize: 15),
-                ),
+                title: toDos.isEmpty
+                    ? Text("加载中...")
+                    : Text(toDos[index]["title"]),
                 subtitle: toDos[index]["date_due"] == "0"
                     ? Text("截止时间: 未设置", style: TextStyle(fontSize: 13))
                     : Text(

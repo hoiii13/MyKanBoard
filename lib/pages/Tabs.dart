@@ -1,3 +1,4 @@
+import 'package:board_app/pages/chatProject.dart';
 import 'package:board_app/pages/tabs/MyCenter.dart';
 import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:board_app/pages/tabs/MyTask.dart';
@@ -69,36 +70,6 @@ class _TabsState extends State<Tabs> {
     print("delete = $result");
   }
 
-  Future initJpush(String username) async {
-    jpush.applyPushAuthority(
-        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
-    jpush.getRegistrationID().then((rid) {
-      print("获得注册的id: $rid");
-    });
-
-    jpush.setup(
-        appKey: "e36315a8b61572f70978d86b",
-        channel: "thisChannel",
-        production: false,
-        debug: true);
-    jpush.setAlias(username).then((map) {
-      print("!!!!!!???????>>>>>>>>>>>>>>>>>>>>>>设置别名成功");
-    });
-
-    try {
-      jpush.addEventHandler(
-          onReceiveNotification: (Map<String, dynamic> message) async {
-        print("flutter onReceiveNotification: $message");
-      }, onOpenNotification: (Map<String, dynamic> message) async {
-        print("flutter onOpenNotification: $message");
-      }, onReceiveMessage: (Map<String, dynamic> message) async {
-        print("flutter onReceiveMessage: $message");
-      });
-    } catch (e) {
-      print("极光sdk配置异常");
-    }
-  }
-
   @override
   void initState() {
     print("token = ${widget.token}");
@@ -114,7 +85,7 @@ class _TabsState extends State<Tabs> {
     String? name = widget.username;
     if (name != null) {
       _getUser(name);
-      initJpush(name);
+      //initJpush(name);
     }
 
     super.initState();
@@ -128,8 +99,14 @@ class _TabsState extends State<Tabs> {
           user_id: _userInfo["id"], username: _userInfo["username"]), //我的任务
       MyMessagePage(
           user_id: _userInfo["id"], username: _userInfo["username"]), //我的消息
-      ProjectAboutpage(username: widget.username, userToken: widget.token), //项目
-      MyCenterPage(username: widget.username, userToken: widget.token) //个人中心
+      ProjectAboutpage(
+          username: widget.username,
+          userToken: widget.token,
+          user_id: _userInfo["id"]), //项目
+      MyCenterPage(
+          username: widget.username,
+          userToken: widget.token,
+          user_id: _userInfo["id"]) //个人中心
     ];
     return Scaffold(
       body: _pageList[

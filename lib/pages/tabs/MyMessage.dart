@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:board_app/component/requestNetwork.dart';
+import 'package:jpush_flutter/jpush_flutter.dart';
 
 //"我的消息"页面
 class MyMessagePage extends StatefulWidget {
@@ -19,6 +20,7 @@ class MyMessagePage extends StatefulWidget {
 class _MyMessagePageState extends State<MyMessagePage> {
   RequestHttp httpCode = RequestHttp();
   TimeChange timeChange = TimeChange();
+  final JPush jpush = JPush();
 
   List _messageList = [];
   List _TaskDetails = [];
@@ -117,10 +119,41 @@ class _MyMessagePageState extends State<MyMessagePage> {
   }
 
   List _taskName = [];
+  Future initJpush(String aliasName) async {
+    jpush.applyPushAuthority(
+        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
+    try {
+      jpush.addEventHandler(
+          onReceiveNotification: (Map<String, dynamic> message) async {
+        print("flutter onReceiveNotification: $message");
+      },
+          //点击通知栏跳转到聊天页面
+          onOpenNotification: (Map<String, dynamic> message) async {
+        final res = message["extras"]["cn.jpush.android.EXTRA"];
+        final _extra = json.decode(res);
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => ChatProjectPage(
+                  task_id: _extra["task_id"],
+                  user_id: widget.user_id,
+                  task_title: message["title"],
+                  project_id: _extra["project_id"],
+                  username: widget.username,
+                )));
+        print("flutter onOpenNotification: $message");
+      }, onReceiveMessage: (Map<String, dynamic> message) async {
+        print("flutter onReceiveMessage: $message");
+      });
+    } catch (e) {
+      print("极光sdk配置异常");
+    }
+  }
 
   @override
   void initState() {
     _getProject();
+    Future.delayed(Duration(seconds: 1), () {
+      initJpush(widget.username);
+    });
     super.initState();
   }
 

@@ -1,4 +1,5 @@
 import 'package:board_app/pages/Login.dart';
+import 'package:board_app/pages/chatProject.dart';
 import 'package:flutter/material.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,7 +10,8 @@ import 'package:board_app/component/requestNetwork.dart';
 class MyCenterPage extends StatefulWidget {
   final username;
   final userToken;
-  MyCenterPage({Key? key, this.username, required this.userToken})
+  final user_id;
+  MyCenterPage({Key? key, this.username, required this.userToken, this.user_id})
       : super(key: key);
 
   @override
@@ -22,36 +24,6 @@ class _MyCenterPageState extends State<MyCenterPage> {
   Map _userMessage = {};
   Map _appRoles = {};
   final JPush jpush = JPush();
-
-  /* Future initJpush() async {
-    jpush.applyPushAuthority(
-        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
-    jpush.getRegistrationID().then((rid) {
-      print("获得注册的id: $rid");
-    });
-
-    jpush.setup(
-        appKey: "e36315a8b61572f70978d86b",
-        channel: "thisChannel",
-        production: false,
-        debug: true);
-    jpush.setAlias(widget.username).then((map) {
-      print("!!!!!!???????>>>>>>>>>>>>>>>>>>>>>>设置别名成功");
-    });
-
-    try {
-      jpush.addEventHandler(
-          onReceiveNotification: (Map<String, dynamic> message) async {
-        print("flutter onReceiveNotification: $message");
-      }, onOpenNotification: (Map<String, dynamic> message) async {
-        print("flutter onOpenNotification: $message");
-      }, onReceiveMessage: (Map<String, dynamic> message) async {
-        print("flutter onReceiveMessage: $message");
-      });
-    } catch (e) {
-      print("极光sdk配置异常");
-    }
-  } */
 
   void _getMe(String baseCode) async {
     final response = await httpCode.requestHttpCode(
@@ -98,11 +70,41 @@ class _MyCenterPageState extends State<MyCenterPage> {
     print("delete = $result");
   }
 
+  Future initJpush(String aliasName) async {
+    jpush.applyPushAuthority(
+        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
+    try {
+      jpush.addEventHandler(
+          onReceiveNotification: (Map<String, dynamic> message) async {
+        print("flutter onReceiveNotification: $message");
+      },
+          //点击通知栏跳转到聊天页面
+          onOpenNotification: (Map<String, dynamic> message) async {
+        final res = message["extras"]["cn.jpush.android.EXTRA"];
+        final _extra = json.decode(res);
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => ChatProjectPage(
+                task_id: _extra["task_id"],
+                user_id: widget.user_id,
+                task_title: message["title"],
+                project_id: _extra["project_id"],
+                username: widget.username)));
+        print("flutter onOpenNotification: $message");
+      }, onReceiveMessage: (Map<String, dynamic> message) async {
+        print("flutter onReceiveMessage: $message");
+      });
+    } catch (e) {
+      print("极光sdk配置异常");
+    }
+  }
+
   @override
   void initState() {
+    Future.delayed(Duration(seconds: 1), () {
+      initJpush(widget.username);
+    });
     _getMe(widget.userToken);
     _getAppRoles();
-    //initJpush();
     super.initState();
   }
 
@@ -119,10 +121,7 @@ class _MyCenterPageState extends State<MyCenterPage> {
           ),
           elevation: 0.5, //阴影高度
         ),
-        body: Center(
-          child: CircularProgressIndicator(
-              color: Colors.red)
-        ),
+        body: Center(child: CircularProgressIndicator(color: Colors.red)),
       );
     } else {
       return Scaffold(
@@ -274,35 +273,12 @@ class _MyCenterPageState extends State<MyCenterPage> {
                   margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
                   child: ElevatedButton(
                     onPressed: () {
+                      jpush.deleteAlias();
                       deleteData("password");
                     },
                     child: Text("退出登录"),
                   ),
                 ),
-                /* Container(
-                  width: _width * 0.5,
-                  height: 50,
-                  margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                  var fireDate = DateTime.fromMicrosecondsSinceEpoch(
-                      DateTime.now().microsecondsSinceEpoch + 2000);
-                  var localNotification = LocalNotification(
-                      id: 2,
-                      title: "验证码",
-                      content: "验证码，仅用于密码修改",
-                      buildId: 1,
-                      fireTime: fireDate,
-                      subtitle: "验证码",
-                      badge: 5,
-                      extra: {"": ""});
-                  jpush.sendLocalNotification(localNotification).then((value) {
-                    print(value);
-                  });
-                },
-                    child: Text("极光推送"),
-                  ),
-                ) */
               ],
             ),
           ));

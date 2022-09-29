@@ -8,19 +8,20 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:board_app/component/requestNetwork.dart';
+import 'package:jpush_flutter/jpush_flutter.dart';
 
 //评论详情页
 class ChatProjectPage extends StatefulWidget {
   final task_id;
   final user_id;
-  final project_title;
+  final task_title;
   final project_id;
   final username;
   ChatProjectPage(
       {Key? key,
       required this.task_id,
       required this.user_id,
-      required this.project_title,
+      required this.task_title,
       required this.project_id,
       this.username})
       : super(key: key);
@@ -32,16 +33,15 @@ class ChatProjectPage extends StatefulWidget {
 class _ChatProjectPageState extends State<ChatProjectPage> {
   final _textController = TextEditingController(); //输入框内容监听
   ScrollController _msgController = new ScrollController();
-
   StreamController<List> _streamController = StreamController();
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   RequestHttp httpCode = RequestHttp();
+  final JPush jpush = JPush();
 
   List AllComments = [];
-
   List sendComment = [];
 
   List aliasList = [];
@@ -197,46 +197,119 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
   List commentsAll = [];
   late Timer _timer;
 
-  void _pushMessage (List alias, String alertContent, String project_title) async{
+  _getTaskDetail(int task_id) async {
+    Map _taskDetail = {};
     var headers = {
-      'Authorization': 'Basic ZTM2MzE1YThiNjE1NzJmNzA5NzhkODZiOmFhYmIwZjNkNmYyZDQwMTcxM2U1OTNmZA==',
+      'Authorization':
+          'Basic anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=',
       'Content-Type': 'application/json'
-      };
-      var request = http.Request('POST', Uri.parse('https://api.jpush.cn/v3/push'));
-      request.body = json.encode({
-        "platform": "all",
-        "audience": {
-          "alias": alias
-          },
-          "notification": {
-            "android": {
-              "alert": alertContent,
-              "title": project_title,
-              "builder_id": 1,
-              "large_icon": "http://www.jiguang.cn/largeIcon.jpg",
-              "extras": {"newsid": 321}
-              }
-              },
-              });
-              request.headers.addAll(headers);
-              http.StreamedResponse response = await request.send();
-              if (response.statusCode == 200) {
-                print(await response.stream.bytesToString());
-                }
-                else {
-                  print(response.reasonPhrase);
-                }
+    };
+    var request = http.Request(
+        'POST', Uri.parse('http://43.154.142.249:18868/jsonrpc.php'));
+    request.body = json.encode({
+      "jsonrpc": "2.0",
+      "method": "getTask",
+      "id": 700738119,
+      "params": {"task_id": task_id}
+    });
+    request.headers.addAll(headers);
 
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      final res = await response.stream.bytesToString();
+      final taskDetail = json.decode(res);
+      _taskDetail = taskDetail["result"];
+      //print("test = ${_taskDetail}");
+    } else {
+      print(response.reasonPhrase);
+    }
+    return _taskDetail;
   }
+
+//极光推送
+  void _pushMessage(List alias, String alertContent, String task_title,
+      String task_id, String project_id) async {
+    var headers = {
+      'Authorization':
+          'Basic ZTM2MzE1YThiNjE1NzJmNzA5NzhkODZiOmFhYmIwZjNkNmYyZDQwMTcxM2U1OTNmZA==',
+      'Content-Type': 'application/json'
+    };
+    var request =
+        http.Request('POST', Uri.parse('https://api.jpush.cn/v3/push'));
+    request.body = json.encode({
+      "platform": "all",
+      "audience": {"alias": alias},
+      "notification": {
+        "android": {
+          "alert": alertContent,
+          "title": task_title,
+          "builder_id": 1,
+          "large_icon": "http://www.jiguang.cn/largeIcon.jpg",
+          "extras": {"task_id": task_id, "project_id": project_id}
+        }
+      },
+    });
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  spikToDetailPush() async {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => ChatProjectPage(
+              task_id: widget.task_id,
+              user_id: widget.user_id,
+              task_title: widget.task_title,
+              project_id: widget.project_id,
+              username: widget.username,
+            )));
+  }
+
+  Future initJpush(String aliasName) async {
+    jpush.applyPushAuthority(
+        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
+    //注册registerID
+    /* jpush.getRegistrationID().then((rid) {
+      print("获得注册的id: $rid");
+    }); */
+
+    jpush.setup(
+        appKey: "e36315a8b61572f70978d86b",
+        channel: "thisChannel",
+        production: false,
+        debug: true);
+
+    try {
+      jpush.addEventHandler(
+          onReceiveNotification: (Map<String, dynamic> message) async {
+        print("flutter onReceiveNotification: $message");
+      }, onOpenNotification: (Map<String, dynamic> message) async {
+        print(
+            "rr = ${message["extras"]["cn.jpush.android.EXTRA"]["project_id"]}");
+        print("flutter onOpenNotification: $message");
+        spikToDetailPush();
+      }, onReceiveMessage: (Map<String, dynamic> message) async {
+        print("flutter onReceiveMessage: $message");
+      });
+    } catch (e) {
+      print("极光sdk配置异常");
+    }
+  }
+
   @override
   void initState() {
+    //_getTaskDetail(int.parse(widget.task_id));
     _getComments(int.parse(widget.task_id));
     /* if (AllComments.length != 0) {
       _jumpBottom();
     } */
 
     _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) async {
-      //print("All  ==== ${AllComments[AllComments.length - 1]}");
       List commentList = await _getComments(int.parse(widget.task_id));
       commentsAll = commentList;
 
@@ -299,7 +372,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
         elevation: 0.2,
         centerTitle: true,
         title: Text(
-          widget.project_title,
+          widget.task_title,
           style: const TextStyle(fontSize: 16, color: Colors.black),
         ),
         leading: IconButton(
@@ -308,7 +381,13 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
             color: Colors.grey,
             size: 35,
           ),
-          onPressed: () {
+          onPressed: () async {
+            /* final _task = await _getTaskDetail(int.parse(widget.task_id));
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => MyTaskDetailPage(
+                    taskDetail: _task,
+                    user_id: widget.user_id,
+                    username: widget.username))); */
             Navigator.pop(context);
           },
         ),
@@ -322,7 +401,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           child: SafeArea(
             child: Column(
               children: [
-                buildChatStream(),
+                chatView(AllComments, widget.user_id),
+                //buildChatStream(),
                 inputView(),
               ],
             ),
@@ -330,7 +410,38 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     );
   }
 
-//评论内容
+  Widget chatView(List comments, String user_id) {
+    if (comments.isEmpty) {
+      return const Expanded(
+          child: Center(
+        child: Text("暂时没有对话"),
+      ));
+    } else {
+      //_jumpBottom();
+      int len = comments.length - 1;
+      return Expanded(
+        child: ListView.builder(
+            reverse: true, //先翻转再倒着输出，这样是为了在我们打开评论页面的时候页面是处于最底部
+            controller: _msgController,
+            itemCount: comments.length,
+            itemBuilder: (context, index) {
+              return BubbleWidget(
+                //avatar: comments[index]["avatar_path"] == "" ? name : ,
+                text: comments[len - index]["comment"],
+                isMyself:
+                    comments[len - index]["user_id"] == user_id ? true : false,
+                name: comments[len - index]["name"] == null ||
+                        comments[len - index]["name"] == ""
+                    ? comments[len - index]["username"]
+                    : comments[len - index]["name"],
+                time: comments[len - index]["date_creation"],
+              );
+            }),
+      );
+    }
+  }
+
+/* //评论内容
   StreamBuilder<List> buildChatStream() {
     return StreamBuilder(
         stream: _streamController.stream,
@@ -345,8 +456,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
             );
           } else {
             final ChatContents = snapshot.data;
-            int len = ChatContents.length - 1;
-            //print("LiaoTian = ${LiaoTian[0]}");
+            //int len = ChatContents.length - 1;
+            print("LiaoTian = ${ChatContents}");
             return Expanded(
               child: ListView.builder(
                   reverse: true, //先翻转再倒着输出，这样是为了在我们打开评论页面的时候页面是处于最底部
@@ -355,16 +466,16 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
                   itemBuilder: (context, index) {
                     return BubbleWidget(
                       //avatar: comments[index]["avatar_path"] == "" ? name : ,
-                      text: ChatContents[len - index]["comment"],
+                      text: ChatContents[ChatContents.length - 1 - index]["comment"],
                       isMyself:
-                          ChatContents[len - index]["user_id"] == widget.user_id
+                          ChatContents[ChatContents.length - 1 - index]["user_id"] == widget.user_id
                               ? true
                               : false,
-                      name: ChatContents[len - index]["name"] == null ||
-                              ChatContents[len - index]["name"] == ""
-                          ? ChatContents[len - index]["username"]
-                          : ChatContents[len - index]["name"],
-                      time: ChatContents[len - index]["date_creation"],
+                      name: ChatContents[ChatContents.length - 1 - index]["name"] == null ||
+                              ChatContents[ChatContents.length - 1 - index]["name"] == ""
+                          ? ChatContents[ChatContents.length - 1 - index]["username"]
+                          : ChatContents[ChatContents.length - 1 - index]["name"],
+                      time: ChatContents[ChatContents.length - 1 - index]["date_creation"],
                     );
                   }),
             );
@@ -373,7 +484,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           //return chatView(snapshot.data, widget.user_id);
         });
   }
-
+ */
 //输入框
   Widget inputView() {
     return Container(
@@ -430,7 +541,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
                   _textController.clear(); //清空输入框的内容
                   //_jumpBottom();
                 }
-                _pushMessage(aliasList, text, widget.project_title);
+                _pushMessage(aliasList, text, widget.task_title, widget.task_id,
+                    widget.project_id);
               },
               child: const Text(
                 "发送",

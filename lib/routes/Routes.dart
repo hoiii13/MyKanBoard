@@ -6,12 +6,13 @@ import '../pages/test2.dart';
 
 final routes = {
   '/tabs': (context, {aguments}) => Tabs(),
-  '/chats': (context, {task_id, user_id, project_id, project_title}) =>
+  '/chats': (context, {task_id, user_id, project_id, task_title}) =>
       ChatProjectPage(
           task_id: task_id,
           user_id: user_id,
-          project_title: project_title,
-          project_id: project_id),
+          task_title: task_title,
+          project_id: project_id,
+          ),
   '/': (context) => LoginPage(),
   '/test': (context) => Test2Page(),
 
