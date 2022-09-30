@@ -178,6 +178,26 @@ class _MyTaskPageState extends State<MyTaskPage>
     }
   }
 
+  _showAlertDialog(String task_title, String content, String sendPeople) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("任务：${task_title}"),
+              content: Text("${sendPeople}@提到了你: \n\n${content}"),
+              semanticLabel: 'Label',
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "ok",
+                      style: TextStyle(color: Colors.red),
+                    ))
+              ],
+            ));
+  }
+
 //6022 alias 操作正在进行中，暂时不能进行其他 alias 操作 3.0.7 版本新增的错误码，
 //多次调用 alias 相关的 API，请在获取到上一次调用回调后再做下一次操作；在未取到回调的情况下，等待 20 秒后再做下一次操作。
 
@@ -208,14 +228,8 @@ class _MyTaskPageState extends State<MyTaskPage>
           onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => ChatProjectPage(
-                  task_id: _extra["task_id"],
-                  user_id: widget.user_id,
-                  task_title: message["title"],
-                  project_id: _extra["project_id"],
-                  username: widget.username,
-                )));
+        _showAlertDialog(
+            message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");

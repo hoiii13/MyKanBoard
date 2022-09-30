@@ -1,0 +1,2 @@
+{
+    alert: @biloute2 1234, extras: {cn.jpush.android.ALERT_TYPE: -1, cn.jpush.android.NOTIFICATION_LARGE_ICON: http://www.jiguang.cn/largeIcon.jpg, cn.jpush.android.NOTIFICATION_ID: 513934195, cn.jpush.android.MSG_ID: 18100378001841978, cn.jpush.android.ALERT: @biloute2 1234, cn.jpush.android.EXTRA: {"project_id":"4","task_id":"9"}}, title: 实验3}

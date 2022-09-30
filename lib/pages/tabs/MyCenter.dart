@@ -1,5 +1,7 @@
+import 'package:board_app/component/receivedJpush.dart';
 import 'package:board_app/pages/Login.dart';
 import 'package:board_app/pages/chatProject.dart';
+import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:flutter/material.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,7 +13,13 @@ class MyCenterPage extends StatefulWidget {
   final username;
   final userToken;
   final user_id;
-  MyCenterPage({Key? key, this.username, required this.userToken, this.user_id})
+  final name;
+  MyCenterPage(
+      {Key? key,
+      this.username,
+      required this.userToken,
+      this.user_id,
+      this.name})
       : super(key: key);
 
   @override
@@ -70,6 +78,26 @@ class _MyCenterPageState extends State<MyCenterPage> {
     print("delete = $result");
   }
 
+  _showAlertDialog(String task_title, String content, String sendPeople) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("任务：${task_title}"),
+              content: Text("${sendPeople}@提到了你: \n\n${content}"),
+              semanticLabel: 'Label',
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "ok",
+                      style: TextStyle(color: Colors.red),
+                    ))
+              ],
+            ));
+  }
+
   Future initJpush(String aliasName) async {
     jpush.applyPushAuthority(
         new NotificationSettingsIOS(sound: true, alert: true, badge: true));
@@ -82,13 +110,13 @@ class _MyCenterPageState extends State<MyCenterPage> {
           onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => ChatProjectPage(
-                task_id: _extra["task_id"],
-                user_id: widget.user_id,
-                task_title: message["title"],
-                project_id: _extra["project_id"],
-                username: widget.username)));
+        /* return ReceviedJPushCode(
+          task_title: message["title"],
+          content: message["alert"],
+          sendPeople: _extra["sendPeople"],
+        ); */
+        _showAlertDialog(
+            message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
@@ -100,7 +128,7 @@ class _MyCenterPageState extends State<MyCenterPage> {
 
   @override
   void initState() {
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 2), () {
       initJpush(widget.username);
     });
     _getMe(widget.userToken);

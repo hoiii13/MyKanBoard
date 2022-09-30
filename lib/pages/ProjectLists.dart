@@ -1,14 +1,19 @@
 import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
+import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:board_app/component/requestNetwork.dart';
+import 'package:jpush_flutter/jpush_flutter.dart';
 
 class ProjectListsPage extends StatefulWidget {
   final title;
   final project_id;
-  const ProjectListsPage({Key? key, this.project_id, this.title})
+  final user_id;
+  final username;
+  const ProjectListsPage(
+      {Key? key, this.project_id, this.title, this.user_id, this.username})
       : super(key: key);
 
   @override
@@ -18,6 +23,7 @@ class ProjectListsPage extends StatefulWidget {
 class _ProjectListsPageState extends State<ProjectListsPage> {
   RequestHttp httpCode = RequestHttp();
   TimeChange timeChange = TimeChange();
+  final JPush jpush = JPush();
   List columnTitles = [];
   List columnIds = [];
   List projectColumns = [];
@@ -82,9 +88,11 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final userInfo = json.decode(res);
-      username = userInfo["result"]["name"] == ""
-          ? userInfo["result"]["username"]
-          : userInfo["result"]["name"];
+      username =
+          userInfo["result"]["name"] == "" || userInfo["result"]["name"] == null
+              ? userInfo["result"]["username"]
+              : userInfo["result"]["name"];
+      print("name == ${username}");
     } else {
       print(response.reasonPhrase);
     }
@@ -111,6 +119,49 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
       _getBoards(int.parse(widget.project_id));
     } else {
       print(response.reasonPhrase);
+    }
+  }
+
+  _showAlertDialog(String task_title, String content, String sendPeople) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("任务：${task_title}"),
+              content: Text("${sendPeople}@提到了你: \n\n${content}"),
+              semanticLabel: 'Label',
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "ok",
+                      style: TextStyle(color: Colors.red),
+                    ))
+              ],
+            ));
+  }
+
+  Future initJpush(String aliasName) async {
+    jpush.applyPushAuthority(
+        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
+    try {
+      jpush.addEventHandler(
+          onReceiveNotification: (Map<String, dynamic> message) async {
+        print("flutter onReceiveNotification: $message");
+      },
+          //点击通知栏跳转到聊天页面
+          onOpenNotification: (Map<String, dynamic> message) async {
+        final res = message["extras"]["cn.jpush.android.EXTRA"];
+        final _extra = json.decode(res);
+        _showAlertDialog(
+            message["title"], message["alert"], _extra["sendPeople"]);
+        print("flutter onOpenNotification: $message");
+      }, onReceiveMessage: (Map<String, dynamic> message) async {
+        print("flutter onReceiveMessage: $message");
+      });
+    } catch (e) {
+      print("极光sdk配置异常");
     }
   }
 
@@ -233,15 +284,18 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
                               "截止时间:${timeChange.timeStamp(tasksList[index]["date_due"])}",
                               style: TextStyle(fontSize: 13)),
                       onTap: () async {
-                        String name = await _getUser(
-                            int.parse(tasksList[index]["owner_id"]));
-                        print("name =  ${tasksList[index]["owner_id"]}");
+                        print("eee = ${tasksList[index]["owner_id"]}");
+                        String name = "";
+                        if (tasksList[index]["owner_id"] != "0") {
+                          String name = await _getUser(
+                              int.parse(tasksList[index]["owner_id"]));
+                        }
 
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => MyTaskDetailPage(
                                 taskDetail: tasksList[index],
                                 user_id: tasksList[index]["owner_id"],
-                                username: name)));
+                                username: widget.username)));
                       },
                     ),
                     onLongPressStart: (LongPressStartDetails details) {

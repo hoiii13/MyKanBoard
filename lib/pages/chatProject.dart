@@ -246,7 +246,11 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "title": task_title,
           "builder_id": 1,
           "large_icon": "http://www.jiguang.cn/largeIcon.jpg",
-          "extras": {"task_id": task_id, "project_id": project_id}
+          "extras": {
+            "task_id": task_id,
+            "project_id": project_id,
+            "sendPeople": widget.username
+          }
         }
       },
     });
@@ -259,15 +263,24 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     }
   }
 
-  spikToDetailPush() async {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => ChatProjectPage(
-              task_id: widget.task_id,
-              user_id: widget.user_id,
-              task_title: widget.task_title,
-              project_id: widget.project_id,
-              username: widget.username,
-            )));
+  _showAlertDialog(String task_title, String content, String sendPeople) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("任务：${task_title}"),
+              content: Text("${sendPeople}@提到了你: \n\n${content}"),
+              semanticLabel: 'Label',
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "ok",
+                      style: TextStyle(color: Colors.red),
+                    ))
+              ],
+            ));
   }
 
   Future initJpush(String aliasName) async {
@@ -289,10 +302,11 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           onReceiveNotification: (Map<String, dynamic> message) async {
         print("flutter onReceiveNotification: $message");
       }, onOpenNotification: (Map<String, dynamic> message) async {
-        print(
-            "rr = ${message["extras"]["cn.jpush.android.EXTRA"]["project_id"]}");
+        final res = message["extras"]["cn.jpush.android.EXTRA"];
+        final _extra = json.decode(res);
+        _showAlertDialog(
+            message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
-        spikToDetailPush();
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
       });
@@ -303,8 +317,10 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 
   @override
   void initState() {
-    //_getTaskDetail(int.parse(widget.task_id));
     _getComments(int.parse(widget.task_id));
+    Future.delayed(Duration(seconds: 1), () {
+      initJpush(widget.username);
+    });
     /* if (AllComments.length != 0) {
       _jumpBottom();
     } */
@@ -382,12 +398,6 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
             size: 35,
           ),
           onPressed: () async {
-            /* final _task = await _getTaskDetail(int.parse(widget.task_id));
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => MyTaskDetailPage(
-                    taskDetail: _task,
-                    user_id: widget.user_id,
-                    username: widget.username))); */
             Navigator.pop(context);
           },
         ),

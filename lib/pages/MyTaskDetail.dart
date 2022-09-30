@@ -62,6 +62,26 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
     }
   }
 
+  _showAlertDialog(String task_title, String content, String sendPeople) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("任务：${task_title}"),
+              content: Text("${sendPeople}@提到了你: \n\n${content}"),
+              semanticLabel: 'Label',
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "ok",
+                      style: TextStyle(color: Colors.red),
+                    ))
+              ],
+            ));
+  }
+
   Future initJpush(String aliasName) async {
     jpush.applyPushAuthority(
         new NotificationSettingsIOS(sound: true, alert: true, badge: true));
@@ -69,22 +89,15 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
       jpush.addEventHandler(
           onReceiveNotification: (Map<String, dynamic> message) async {
         print("flutter onReceiveNotification: $message");
-      }, 
-      //点击通知栏跳转到聊天页面
-      onOpenNotification: (Map<String, dynamic> message) async {
+      },
+          //点击通知栏跳转到聊天页面
+          onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => ChatProjectPage(
-                            task_id: _extra["task_id"],
-                            user_id: widget.user_id,
-                            task_title: message["title"],
-                            project_id: _extra["project_id"],
-                            username: widget.username,
-                          )));
+        _showAlertDialog(
+            message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
-      }, 
-      onReceiveMessage: (Map<String, dynamic> message) async {
+      }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
       });
     } catch (e) {
@@ -95,7 +108,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
   @override
   void initState() {
     /* _getCreateUser(); */
-    Future.delayed(Duration(seconds: 1),() {
+    Future.delayed(Duration(seconds: 1), () {
       initJpush(widget.username);
     });
     int id = int.parse(widget.taskDetail["creator_id"]);
@@ -281,7 +294,8 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                       //显示参与的人员的头像
                       padding: EdgeInsets.only(left: 20),
                       child: CircleAvatar(
-                        child: widget.taskDetail["assignee_name"] == ""
+                        child: widget.taskDetail["assignee_name"] == "" ||
+                                widget.taskDetail["assignee_name"] == null
                             ? Text(
                                 "${widget.taskDetail["assignee_username"].toString().substring(0, 1)}", //取名字的第一个字
                                 style: TextStyle(color: Colors.white),
@@ -349,8 +363,6 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
       )),
     );
   }
-
-
 }
 
 class CreateTaskUser {

@@ -1,5 +1,6 @@
 import 'package:board_app/pages/ProjectLists.dart';
 import 'package:board_app/pages/chatProject.dart';
+import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -86,6 +87,26 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
     return _userDetail;
   }
 
+  _showAlertDialog(String task_title, String content, String sendPeople) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("任务：${task_title}"),
+              content: Text("${sendPeople}@提到了你: \n\n${content}"),
+              semanticLabel: 'Label',
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "ok",
+                      style: TextStyle(color: Colors.red),
+                    ))
+              ],
+            ));
+  }
+
   Future initJpush(String aliasName) async {
     jpush.applyPushAuthority(
         new NotificationSettingsIOS(sound: true, alert: true, badge: true));
@@ -98,14 +119,8 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
           onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => ChatProjectPage(
-                  task_id: _extra["task_id"],
-                  user_id: widget.user_id,
-                  task_title: message["title"],
-                  project_id: _extra["project_id"],
-                  username: widget.username,
-                )));
+        _showAlertDialog(
+            message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
@@ -170,6 +185,8 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
                         builder: (_) => ProjectListsPage(
                               project_id: _myProjects[index]["id"],
                               title: _myProjects[index]["name"],
+                              user_id: widget.user_id,
+                              username: widget.username,
                             )));
                   },
                 ),

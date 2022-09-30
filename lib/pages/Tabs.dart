@@ -13,10 +13,10 @@ import 'package:board_app/pages/Login.dart';
 
 class Tabs extends StatefulWidget {
   final index;
-  final num;
   final username;
   final token;
-  Tabs({Key? key, this.index = 0, this.num = 0, this.username, this.token})
+  final name;
+  Tabs({Key? key, this.index = 0, this.username, this.token, this.name})
       : super(key: key);
 
   @override
@@ -106,7 +106,8 @@ class _TabsState extends State<Tabs> {
       MyCenterPage(
           username: widget.username,
           userToken: widget.token,
-          user_id: _userInfo["id"]) //个人中心
+          user_id: _userInfo["id"],
+          name: _userInfo["name"]) //个人中心
     ];
     return Scaffold(
       body: _pageList[
