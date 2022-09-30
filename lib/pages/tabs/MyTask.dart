@@ -178,36 +178,6 @@ class _MyTaskPageState extends State<MyTaskPage>
     }
   }
 
-  Future initJpush(String username) async {
-    jpush.applyPushAuthority(
-        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
-    jpush.getRegistrationID().then((rid) {
-      print("获得注册的id: $rid");
-    });
-
-    jpush.setup(
-        appKey: "e36315a8b61572f70978d86b",
-        channel: "thisChannel",
-        production: false,
-        debug: true);
-    jpush.setAlias(username).then((map) {
-      print("!!!!!!???????>>>>>>>>>>>>>>>>>>>>>>设置别名成功");
-    });
-
-    try {
-      jpush.addEventHandler(
-          onReceiveNotification: (Map<String, dynamic> message) async {
-        print("flutter onReceiveNotification: $message");
-      }, onOpenNotification: (Map<String, dynamic> message) async {
-        print("flutter onOpenNotification: $message");
-      }, onReceiveMessage: (Map<String, dynamic> message) async {
-        print("flutter onReceiveMessage: $message");
-      });
-    } catch (e) {
-      print("极光sdk配置异常");
-    }
-  }
-
 //6022 alias 操作正在进行中，暂时不能进行其他 alias 操作 3.0.7 版本新增的错误码，
 //多次调用 alias 相关的 API，请在获取到上一次调用回调后再做下一次操作；在未取到回调的情况下，等待 20 秒后再做下一次操作。
 
