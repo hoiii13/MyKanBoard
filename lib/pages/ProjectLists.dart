@@ -182,7 +182,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
         centerTitle: true, //标题居中
         title: Text(
           widget.title,
-          style: TextStyle(fontSize: 15, color: Colors.black),
+          style: TextStyle(fontSize: 20, color: Colors.white),
         ),
         elevation: 0.5, //阴影高度
       ),
@@ -197,8 +197,11 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
                 color: Colors.grey[200],
                 child: ListTile(
                   title: columnTitles.isEmpty
-                      ? Text("加载中...")
-                      : Text(columnTitles[num]),
+                      ? Text(
+                          "加载中...",
+                          style: TextStyle(fontSize: 18),
+                        )
+                      : Text(columnTitles[num], style: TextStyle(fontSize: 18)),
                   trailing: _isClick
                       ? Icon(Icons.expand_more)
                       : Icon(Icons.chevron_right),
@@ -226,7 +229,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
         },
         child: Icon(
           Icons.refresh,
-          color: Colors.red,
+          color: Colors.white,
         ),
       ),
     );
@@ -247,7 +250,10 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
                     children: [
                       GestureDetector(
                         child: ListTile(
-                          title: Text(columnTitles[index]),
+                          title: Text(
+                            columnTitles[index],
+                            style: TextStyle(fontSize: 18),
+                          ),
                           onTap: () {
                             setState(() {
                               _isClick = !_isClick;
@@ -277,12 +283,13 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
               return Column(children: [
                 GestureDetector(
                     child: ListTile(
-                      title: Text(tasksList[index]["title"]),
+                      title: Text(tasksList[index]["title"],
+                          style: TextStyle(fontSize: 18)),
                       subtitle: tasksList[index]["date_due"] == "0"
-                          ? Text("截止时间: 未设置", style: TextStyle(fontSize: 13))
+                          ? Text("截止时间: 未设置", style: TextStyle(fontSize: 15))
                           : Text(
                               "截止时间:${timeChange.timeStamp(tasksList[index]["date_due"])}",
-                              style: TextStyle(fontSize: 13)),
+                              style: TextStyle(fontSize: 15)),
                       onTap: () async {
                         print("eee = ${tasksList[index]["owner_id"]}");
                         String name = "";
@@ -294,7 +301,8 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => MyTaskDetailPage(
                                 taskDetail: tasksList[index],
-                                user_id: tasksList[index]["owner_id"],
+                                user_id: widget.user_id,
+                                //user_id: tasksList[index]["owner_id"],
                                 username: widget.username)));
                       },
                     ),

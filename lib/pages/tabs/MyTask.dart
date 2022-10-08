@@ -5,7 +5,6 @@ import 'package:board_app/pages/chatProject.dart';
 import 'package:board_app/pages/tabs/MyProject.dart';
 import 'package:board_app/routes/Routes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:board_app/component/requestNetwork.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
@@ -268,16 +267,22 @@ class _MyTaskPageState extends State<MyTaskPage>
           appBar: AppBar(
             centerTitle: true, //标题居中
             title: Text("我的任务",
-                style: TextStyle(fontSize: 15, color: Colors.black)),
+                style: TextStyle(fontSize: 20, color: Colors.white)),
             elevation: 0.5, //阴影高度
             //shadowColor: Colors.red,
             bottom: TabBar(
               controller: tabController, //监听
               isScrollable: true,
-              indicatorColor: Colors.red, //导航线（指示器）的颜色
-              labelColor: Colors.red, //选中时的颜色
+              indicatorColor: Color.fromARGB(255, 0, 29, 72), //导航线（指示器）的颜色
+              labelColor: Colors.white, //选中时的颜色
               unselectedLabelColor: Colors.grey, //未选中时的颜色
-
+              labelStyle: TextStyle(fontSize: 16),
+              /* tabs: tabsName.map((_tabName) {
+                return Text(
+                  _tabName,
+                  style: TextStyle(fontSize: 16),
+                );
+              }).toList(), */
               tabs: <Widget>[
                 Tab(text: "我的待办"),
                 Tab(text: "进行中"),
@@ -306,10 +311,7 @@ class _MyTaskPageState extends State<MyTaskPage>
             onPressed: () {
               _onRefresh();
             },
-            child: Icon(
-              Icons.refresh,
-              color: Colors.red,
-            ),
+            child: Icon(Icons.refresh, color: Colors.white),
           ),
         ));
   }
@@ -329,12 +331,15 @@ class _MyTaskPageState extends State<MyTaskPage>
               child: ListTile(
                 title: toDos.isEmpty
                     ? Text("加载中...")
-                    : Text(toDos[index]["title"]),
+                    : Text(
+                        toDos[index]["title"],
+                        style: TextStyle(fontSize: 18),
+                      ),
                 subtitle: toDos[index]["date_due"] == "0"
-                    ? Text("截止时间: 未设置", style: TextStyle(fontSize: 13))
+                    ? Text("截止时间: 未设置", style: TextStyle(fontSize: 15))
                     : Text(
                         "截止时间:${timeChange.timeStamp(toDos[index]["date_due"])}",
-                        style: TextStyle(fontSize: 13)),
+                        style: TextStyle(fontSize: 15)),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => MyTaskDetailPage(

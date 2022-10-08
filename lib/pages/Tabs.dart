@@ -10,6 +10,8 @@ import 'package:board_app/component/requestNetwork.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:board_app/pages/Login.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Tabs extends StatefulWidget {
   final index;
@@ -93,12 +95,16 @@ class _TabsState extends State<Tabs> {
 
   @override
   Widget build(BuildContext context) {
+    final _height = MediaQuery.of(context).size.height; //得到屏幕的宽高
     final List _pageList = [
       //页面集合
       MyTaskPage(
           user_id: _userInfo["id"], username: _userInfo["username"]), //我的任务
       MyMessagePage(
-          user_id: _userInfo["id"], username: _userInfo["username"]), //我的消息
+        user_id: _userInfo["id"],
+        username: _userInfo["username"],
+        name: _userInfo["name"],
+      ), //我的消息
       ProjectAboutpage(
           username: widget.username,
           userToken: widget.token,
@@ -121,7 +127,7 @@ class _TabsState extends State<Tabs> {
           });
         },
         iconSize: 28.0, //每个导航按钮的大小
-        fixedColor: Colors.red,
+        fixedColor: Color.fromARGB(255, 0, 29, 72),
         type: BottomNavigationBarType.fixed, //type是按钮的显示类型，这样写才可以让按钮超过3个
         items: [
           BottomNavigationBarItem(

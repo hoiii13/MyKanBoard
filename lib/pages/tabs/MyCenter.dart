@@ -145,11 +145,13 @@ class _MyCenterPageState extends State<MyCenterPage> {
           centerTitle: true, //标题居中
           title: const Text(
             "个人中心",
-            style: TextStyle(fontSize: 14, color: Colors.black),
+            style: TextStyle(fontSize: 20, color: Colors.white),
           ),
           elevation: 0.5, //阴影高度
         ),
-        body: Center(child: CircularProgressIndicator(color: Colors.red)),
+        body: Center(
+            child: CircularProgressIndicator(
+                color: Color.fromARGB(255, 0, 29, 72))),
       );
     } else {
       return Scaffold(
@@ -157,7 +159,7 @@ class _MyCenterPageState extends State<MyCenterPage> {
             centerTitle: true, //标题居中
             title: const Text(
               "个人中心",
-              style: TextStyle(fontSize: 15, color: Colors.black),
+              style: TextStyle(fontSize: 20, color: Colors.white),
             ),
             elevation: 0.5, //阴影高度
           ),
@@ -170,18 +172,20 @@ class _MyCenterPageState extends State<MyCenterPage> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                       child: CircleAvatar(
-                        backgroundColor: Colors.red,
+                        backgroundColor: Color.fromARGB(255, 191, 64, 100),
                         radius: 35,
                         child: _userMessage["name"] == ""
                             ? Text(
                                 _userMessage["username"]
                                     .toString()
                                     .substring(0, 1),
-                                style: const TextStyle(fontSize: 23),
+                                style: const TextStyle(
+                                    fontSize: 23, color: Colors.white),
                               )
                             : Text(
                                 _userMessage["name"].toString().substring(0, 1),
-                                style: const TextStyle(fontSize: 23),
+                                style: const TextStyle(
+                                    fontSize: 23, color: Colors.white),
                               ),
                       ),
                     ),
@@ -208,13 +212,19 @@ class _MyCenterPageState extends State<MyCenterPage> {
                                     width: _width * 0.2,
                                     child: Text(
                                       "用户名：",
-                                      style: TextStyle(fontSize: 16),
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color:
+                                              Color.fromARGB(255, 0, 29, 72)),
                                     ),
                                   ),
                                   Container(
                                     child: Text(
                                       _userMessage["username"],
-                                      style: TextStyle(fontSize: 16),
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color:
+                                              Color.fromARGB(255, 0, 29, 72)),
                                     ),
                                   )
                                 ],
@@ -230,16 +240,25 @@ class _MyCenterPageState extends State<MyCenterPage> {
                                     width: _width * 0.2,
                                     child: Text(
                                       "姓名：",
-                                      style: TextStyle(fontSize: 16),
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color:
+                                              Color.fromARGB(255, 0, 29, 72)),
                                     ),
                                   ),
                                   Container(
                                       child: _userMessage["name"] == ""
                                           ? Text("无",
-                                              style: TextStyle(fontSize: 16))
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: Color.fromARGB(
+                                                      255, 0, 29, 72)))
                                           : Text(
                                               _userMessage["name"],
-                                              style: TextStyle(fontSize: 16),
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: Color.fromARGB(
+                                                      255, 0, 29, 72)),
                                             ))
                                 ],
                               ),
@@ -265,31 +284,53 @@ class _MyCenterPageState extends State<MyCenterPage> {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: const Icon(
-                            Icons.mail,
-                            color: Colors.black45,
-                          ),
+                          leading: const Icon(Icons.mail,
+                              color: Color.fromARGB(255, 0, 29, 72)),
                           title: const Text(
                             "邮箱:",
-                            style: TextStyle(color: Colors.black, fontSize: 15),
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 0, 29, 72),
+                                fontSize: 18),
                           ),
                           trailing: _userMessage["email"] == ""
-                              ? Text("无")
-                              : Text("${_userMessage["email"]}"),
+                              ? Text(
+                                  "无",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Color.fromARGB(255, 0, 29, 72)),
+                                )
+                              : Text(
+                                  "${_userMessage["email"]}",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Color.fromARGB(255, 0, 29, 72)),
+                                ),
                         ),
                         const Divider(),
                         ListTile(
                           leading: const Icon(
                             Icons.emoji_people,
-                            color: Colors.black45,
+                            color: Color.fromARGB(255, 0, 29, 72),
                           ),
                           title: const Text(
                             "角色:",
-                            style: TextStyle(color: Colors.black, fontSize: 15),
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 0, 29, 72),
+                                fontSize: 18),
                           ),
                           trailing: _userMessage["role"] == ""
-                              ? Text("无")
-                              : Text("${_appRoles[_userMessage["role"]]}"),
+                              ? Text(
+                                  "无",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Color.fromARGB(255, 0, 29, 72)),
+                                )
+                              : Text(
+                                  "${_appRoles[_userMessage["role"]]}",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Color.fromARGB(255, 0, 29, 72)),
+                                ),
                         )
                       ],
                     ),
@@ -304,7 +345,8 @@ class _MyCenterPageState extends State<MyCenterPage> {
                       jpush.deleteAlias();
                       deleteData("password");
                     },
-                    child: Text("退出登录"),
+                    child: Text("退出登录",
+                        style: TextStyle(fontSize: 18, color: Colors.white)),
                   ),
                 ),
               ],

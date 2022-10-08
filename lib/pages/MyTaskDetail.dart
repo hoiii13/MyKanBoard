@@ -4,7 +4,6 @@ import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/chatProject.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 import '../pages/tabs/MyTask.dart';
 import '../colorAbout/color.dart';
@@ -27,8 +26,6 @@ class MyTaskDetailPage extends StatefulWidget {
 class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
   String createUser = "";
   String _createUser = " ";
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
   RequestHttp httpCode = RequestHttp();
   TimeChange timeChange = TimeChange();
   final JPush jpush = JPush();
@@ -123,20 +120,18 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
     var _adminColor = Colors.primaries[
         Random().nextInt(Colors.primaries.length)]; //随机生成创建人员的头像的背景颜色
 
-    int id = int.parse(widget.taskDetail["creator_id"]);
-    // print("!! = ${widget.taskDetail}");
     return Scaffold(
       appBar: AppBar(
         elevation: 0.2,
         centerTitle: true,
         title: Text(
           "${widget.taskDetail["title"]}",
-          style: TextStyle(fontSize: 15, color: Colors.red),
+          style: TextStyle(fontSize: 20, color: Colors.white),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.navigate_before,
-            color: Colors.red,
+            color: Colors.white,
             size: 35,
           ),
           onPressed: () {
@@ -182,7 +177,9 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                         child: const Text(
                           "任务详情：",
                           textAlign: TextAlign.left,
-                          style: TextStyle(color: Colors.black, fontSize: 15),
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 0, 29, 72),
+                              fontSize: 18),
                         ),
                       ),
                       SizedBox(height: 10),
@@ -190,7 +187,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                         alignment: Alignment.topLeft,
                         child: Text(
                           widget.taskDetail["description"],
-                          style: TextStyle(color: Colors.black45),
+                          style: TextStyle(color: Colors.black45, fontSize: 17),
                         ),
                       )
                     ],
@@ -217,47 +214,54 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                     //contentPadding: EdgeInsets.all(5),
                     leading: const Icon(
                       Icons.calendar_today,
-                      color: Colors.black,
-                      size: 20,
+                      color: Color.fromARGB(255, 0, 29, 72),
+                      size: 22,
                     ),
                     title: const Text(
                       "开始时间:",
-                      style: TextStyle(color: Colors.black, fontSize: 15),
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 0, 29, 72), fontSize: 18),
                     ),
+
                     trailing: widget.taskDetail["date_started"] == "0" ||
                             widget.taskDetail["date_started"] == null
                         ? Text(
                             "0000-00-00",
-                            style:
-                                TextStyle(color: Colors.black45, fontSize: 15),
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 0, 29, 72),
+                                fontSize: 18),
                           )
                         : Text(
                             "${timeChange.timeStamp(widget.taskDetail["date_started"])}",
-                            style:
-                                TextStyle(color: Colors.black45, fontSize: 15),
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 0, 29, 72),
+                                fontSize: 18),
                           ),
                   ),
                   ListTile(
                     //contentPadding: EdgeInsets.all(5),
                     leading: Icon(
                       Icons.domain_verification,
-                      color: Colors.black,
+                      color: Color.fromARGB(255, 0, 29, 72),
                     ),
                     title: Text(
                       "结束时间:",
-                      style: TextStyle(color: Colors.black, fontSize: 15),
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 0, 29, 72), fontSize: 18),
                     ),
                     trailing: widget.taskDetail["date_due"] == "0" ||
                             widget.taskDetail["date_due"] == null
                         ? Text(
                             "0000-00-00",
-                            style:
-                                TextStyle(color: Colors.black45, fontSize: 15),
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 0, 29, 72),
+                                fontSize: 18),
                           )
                         : Text(
                             "${timeChange.timeStamp(widget.taskDetail["date_due"])}",
-                            style:
-                                TextStyle(color: Colors.black45, fontSize: 15),
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 0, 29, 72),
+                                fontSize: 18),
                           ),
                   ),
                 ]),
@@ -281,42 +285,49 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const ListTile(
-                      leading: Icon(
-                        Icons.people,
-                        color: Colors.black,
-                      ),
+                      leading: Icon(Icons.people,
+                          color: Color.fromARGB(255, 0, 29, 72), size: 22),
                       title: Text(
                         "参与人员:",
-                        style: TextStyle(color: Colors.black, fontSize: 15),
+                        style: TextStyle(
+                            color: Color.fromARGB(255, 0, 29, 72),
+                            fontSize: 18),
                       ),
                     ),
                     Padding(
                       //显示参与的人员的头像
                       padding: EdgeInsets.only(left: 20),
-                      child: CircleAvatar(
-                        child: widget.taskDetail["assignee_name"] == "" ||
-                                widget.taskDetail["assignee_name"] == null
-                            ? Text(
-                                "${widget.taskDetail["assignee_username"].toString().substring(0, 1)}", //取名字的第一个字
-                                style: TextStyle(color: Colors.white),
-                              )
-                            : Text(
-                                "${widget.taskDetail["assignee_name"].toString().substring(0, 1)}", //取名字的第一个字
-                                style: TextStyle(color: Colors.white),
-                              ),
-                        backgroundColor: Color.fromARGB(255, 136, 199, 138),
-                        /* backgroundColor: Colors.primaries[
+                      child: widget.taskDetail["assignee_username"] == null
+                          ? const CircleAvatar(
+                              child: Text(""),
+                              backgroundColor:
+                                  Color.fromARGB(255, 136, 199, 138),
+                            )
+                          : CircleAvatar(
+                              child: widget.taskDetail["assignee_name"] == "" ||
+                                      widget.taskDetail["assignee_name"] == null
+                                  ? Text(
+                                      "${widget.taskDetail["assignee_username"].toString().substring(0, 1)}", //取名字的第一个字
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  : Text(
+                                      "${widget.taskDetail["assignee_name"].toString().substring(0, 1)}", //取名字的第一个字
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                              backgroundColor:
+                                  Color.fromARGB(255, 136, 199, 138),
+                              /* backgroundColor: Colors.primaries[
                             Random().nextInt(Colors.primaries.length)], */
-                      ),
+                            ),
                     ),
                     ListTile(
-                      leading: Icon(
-                        Icons.person_outline,
-                        color: Colors.black,
-                      ),
+                      leading: Icon(Icons.person_outline,
+                          color: Color.fromARGB(255, 0, 29, 72), size: 22),
                       title: Text(
                         "创建人员:",
-                        style: TextStyle(color: Colors.black, fontSize: 15),
+                        style: TextStyle(
+                            color: Color.fromARGB(255, 0, 29, 72),
+                            fontSize: 18),
                       ),
                     ),
                     Padding(
@@ -327,7 +338,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                           "${_createUser.toString().substring(0, 1)}", //取名字的前2个字
                           style: TextStyle(color: Colors.white),
                         ),
-                        backgroundColor: Colors.red,
+                        backgroundColor: Color.fromARGB(255, 191, 64, 100),
                         // backgroundColor: _adminColor,
                       ),
                     ),
@@ -340,7 +351,8 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
               child: ElevatedButton(
                 child: Text(
                   "进入评论区",
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(
+                      color: Color.fromARGB(255, 0, 29, 72), fontSize: 18),
                 ),
                 style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all(Size(200, 50)),

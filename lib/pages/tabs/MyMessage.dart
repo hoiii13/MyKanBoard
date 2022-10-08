@@ -11,7 +11,9 @@ import 'package:jpush_flutter/jpush_flutter.dart';
 class MyMessagePage extends StatefulWidget {
   final user_id;
   final username;
-  MyMessagePage({Key? key, this.user_id, this.username}) : super(key: key);
+  final name;
+  MyMessagePage({Key? key, this.user_id, this.username, this.name})
+      : super(key: key);
 
   @override
   State<MyMessagePage> createState() => _MyMessagePageState();
@@ -52,9 +54,47 @@ class _MyMessagePageState extends State<MyMessagePage> {
     setState(() {
       Allprojects = _projects;
       for (var i = 0; i < Allprojects.length; i++) {
-        _getData(int.parse(Allprojects[i]["id"]));
+        //_getData(int.parse(Allprojects[i]["id"]));
+        Future.delayed(Duration(seconds: 1), () async {
+          final Activities =
+              await _getProjectActivity(int.parse(Allprojects[i]["id"]));
+          print("chang = ${Activities.length}   ${Allprojects[i]["id"]}");
+          _Allactivities.addAll(Activities);
+        });
       }
     });
+  }
+
+//得到动态记录
+  List _Allactivities = [];
+  List _MyActivityAbouts = [];
+  List _myTasks = [];
+  _getProjectActivity(int id) async {
+    List _activities = [];
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getProjectActivity",
+          "id": 942472945,
+          "params": {"project_id": id}
+        }),
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+
+    if (response.statusCode == 200) {
+      final res = await response.stream.bytesToString();
+      final activities = json.decode(res);
+      setState(() {
+        _activities = activities["result"];
+      });
+      print("lll = ${_activities.length}");
+      /* setState(() {
+        _Allactivities.addAll(_activities);
+        print("ppp = ${_Allactivities.length}");
+      }); */
+    } else {
+      print(response.reasonPhrase);
+    }
+    return _activities;
   }
 
   List _Alltasks = [];
@@ -173,6 +213,64 @@ class _MyMessagePageState extends State<MyMessagePage> {
 
   @override
   Widget build(BuildContext context) {
+    /* print("ooo = ${Allprojects.length}");
+    if (_Allactivities.isNotEmpty) {
+      List activity = [];
+      print("len = ${_Allactivities.length}");
+      for (var i = 0; i < _Allactivities.length; i++) {
+        if (_Allactivities[i]["event_name"] == "comment.create") {
+          //print("All == ${_Allactivities[i]["comment"]}");
+          if (_Allactivities[i]["comment"]["comment"]
+                  .contains("@" + widget.username) ==
+              true) {
+            _MyActivityAbouts.add(_Allactivities[i]);
+          }
+        } else if (_Allactivities[i]["event_name"] == "task.assign_change") {
+          if (_Allactivities[i]["event_title"]
+                      .contains("指派给了 " + widget.username) ==
+                  true ||
+              _Allactivities[i]["event_title"]
+                      .contains("指派给了 " + widget.name) ==
+                  true) {
+            _MyActivityAbouts.add(_Allactivities[i]);
+          }
+        }
+      }
+      print("object == ${_MyActivityAbouts.length}");
+      for (var i = 0; i < _MyActivityAbouts.length; i++) {
+        if (_myTasks.contains(_MyActivityAbouts[i]["task_id"]) == false) {
+          _myTasks.add(_MyActivityAbouts[i]);
+        }
+      }
+      // print("object == ${_myTasks.length}");
+    }
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true, //标题居中
+        title: const Text(
+          "我的消息",
+          style: TextStyle(fontSize: 20, color: Colors.white),
+        ),
+        elevation: 0.5, //阴影高度
+      ),
+      body: ListView.builder(
+          itemCount: _myTasks.length,
+          itemBuilder: ((context, index) {
+            return Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Card(
+                    elevation: 5,
+                    child: Column(
+                      children: [Text("${_myTasks[index]["task"]["title"]}")],
+                    ),
+                  )
+                ],
+              ),
+            );
+          })),
+    ); */
     //筛选出@当前用户的
     if (_AllComments.isNotEmpty) {
       _messageList = _AllComments.where((v) =>
@@ -189,12 +287,12 @@ class _MyMessagePageState extends State<MyMessagePage> {
         centerTitle: true, //标题居中
         title: const Text(
           "我的消息",
-          style: TextStyle(fontSize: 15, color: Colors.black),
+          style: TextStyle(fontSize: 20, color: Colors.white),
         ),
         elevation: 0.5, //阴影高度
       ),
       body: RefreshIndicator(
-        color: Colors.red,
+        color: Color.fromARGB(255, 0, 29, 72),
         onRefresh: () async {
           setState(() {
             _onRefresh();
@@ -208,7 +306,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
         },
         child: Icon(
           Icons.refresh,
-          color: Colors.red,
+          color: Colors.white,
         ),
       ),
     );
@@ -218,7 +316,13 @@ class _MyMessagePageState extends State<MyMessagePage> {
     if (messageList.isEmpty) {
       return Container(
           child: const Center(
-        child: Text("暂无通知"),
+        child: Text(
+          "暂无通知",
+          style: TextStyle(
+            fontSize: 18,
+            color: Color.fromARGB(255, 0, 29, 72),
+          ),
+        ),
         /* child: CircularProgressIndicator(
             color: Color.fromARGB(255, 148, 196, 235)), */
       ));
@@ -260,9 +364,9 @@ class _MyMessagePageState extends State<MyMessagePage> {
                                       blurRadius: 5.0,
                                       color: Colors.grey.withOpacity(1))
                                 ],
-                                color: Color.fromARGB(255, 243, 70, 58),
+                                color: Color.fromARGB(255, 0, 29, 72),
                                 border: Border.all(
-                                  color: Color.fromARGB(255, 243, 70, 58),
+                                  color: Color.fromARGB(255, 0, 29, 72),
                                 ),
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(6))),
@@ -286,10 +390,10 @@ class _MyMessagePageState extends State<MyMessagePage> {
                                 TextButton(
                                   child: Text(
                                     "点击查看任务",
-                                    style: TextStyle(color: Colors.red),
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 0, 29, 72)),
                                   ),
                                   onPressed: () {
-                                    print("test = ${_TaskDetails[0]}");
                                     Navigator.of(context)
                                         .push(MaterialPageRoute(
                                             builder: (_) => MyTaskDetailPage(
@@ -303,7 +407,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
                                 Container(
                                   child: Icon(
                                     Icons.navigate_next,
-                                    color: Colors.red,
+                                    color: Color.fromARGB(255, 0, 29, 72),
                                   ),
                                 ),
                               ],

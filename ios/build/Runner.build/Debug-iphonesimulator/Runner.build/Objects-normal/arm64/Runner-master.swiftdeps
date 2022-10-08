@@ -1,0 +1,6 @@
+version: "Apple Swift version 5.7 (swiftlang-5.7.0.127.4 clang-1400.0.29.50)"
+options: "2e472b99e53c2858005ce1ef225cf545fefe641907f16de9afe8c2e3cf5cf601"
+build_start_time: [1665191768, 17603874]
+build_end_time: [1665191768, 38946151]
+inputs:
+  "/Users/yds/Desktop/board/MyKanBoard/ios/Runner/AppDelegate.swift": !private [1664530961, 252889156]

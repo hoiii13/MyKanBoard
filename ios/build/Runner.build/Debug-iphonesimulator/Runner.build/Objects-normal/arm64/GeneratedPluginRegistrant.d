@@ -1,0 +1,20 @@
+dependencies: \
+  /Users/yds/Desktop/board/MyKanBoard/ios/Runner/GeneratedPluginRegistrant.m \
+  /Users/yds/Desktop/board/MyKanBoard/ios/Runner/GeneratedPluginRegistrant.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Modules/module.modulemap \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterViewController.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterPluginAppLifeCycleDelegate.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterHeadlessDartRunner.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterEngineGroup.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterEngine.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterDartProject.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterCallbackCache.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterTexture.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterPlatformViews.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterCodecs.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterChannels.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterBinaryMessenger.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterPlugin.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterMacros.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/FlutterAppDelegate.h \
+  /Users/yds/Desktop/board/MyKanBoard/build/ios/Debug-iphonesimulator/Flutter.framework/Headers/Flutter.h

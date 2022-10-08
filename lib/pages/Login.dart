@@ -8,6 +8,7 @@ import 'package:board_app/component/toastPosition.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:board_app/pages/tabs/MyCenter.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key? key}) : super(key: key);
@@ -78,36 +79,6 @@ class _LoginPageState extends State<LoginPage> {
     return _userMessage;
   }
 
-  /* Future initJpush(String aliasName) async {
-    jpush.applyPushAuthority(
-        new NotificationSettingsIOS(sound: true, alert: true, badge: true));
-    jpush.getRegistrationID().then((rid) {
-      print("获得注册的id: $rid");
-    });
-
-    jpush.setup(
-        appKey: "e36315a8b61572f70978d86b",
-        channel: "thisChannel",
-        production: false,
-        debug: true);
-    jpush.setAlias(aliasName).then((map) {
-      print("!!!!!!???????>>>>>>>>>>>>>>>>>>>>>>设置别名成功");
-    });
-
-    try {
-      jpush.addEventHandler(
-          onReceiveNotification: (Map<String, dynamic> message) async {
-        print("flutter onReceiveNotification: $message");
-      }, onOpenNotification: (Map<String, dynamic> message) async {
-        print("flutter onOpenNotification: $message");
-      }, onReceiveMessage: (Map<String, dynamic> message) async {
-        print("flutter onReceiveMessage: $message");
-      });
-    } catch (e) {
-      print("极光sdk配置异常");
-    }
-  } */
-
   @override
   void initState() {
     readData("password");
@@ -117,14 +88,18 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final _width = MediaQuery.of(context).size.width; //得到屏幕的宽高
-    return Scaffold(
 
+    return Scaffold(
         appBar: AppBar(
           centerTitle: true, //标题居中
           automaticallyImplyLeading: false,
           title: const Text(
             "登陆",
-            style: TextStyle(fontSize: 16, color: Colors.black),
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+            ),
+            //textScaleFactor: 1.0,
           ),
 
           elevation: 0.5, //阴影高度
@@ -141,42 +116,49 @@ class _LoginPageState extends State<LoginPage> {
                     TextField(
                       //autofocus: true,
                       controller: _usernameController,
-                      cursorColor: Colors.red,
+                      cursorColor: Color.fromARGB(255, 0, 29, 72),
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(
                             borderSide: BorderSide(
-                                color: Colors.red,
+                                color: Color.fromARGB(255, 0, 29, 72),
                                 width: 3,
                                 style: BorderStyle.solid)),
                         labelText: "用户名",
-                        labelStyle: TextStyle(color: Colors.red, fontSize: 16),
+                        labelStyle: TextStyle(
+                            color: Color.fromARGB(255, 0, 29, 72),
+                            fontSize: 16),
                         enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.red)),
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(255, 0, 29, 72))),
                         focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.red)),
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(255, 0, 29, 72))),
                         prefixIcon: Icon(
                           Icons.person,
-                          color: Colors.red,
+                          color: Color.fromARGB(255, 0, 29, 72),
                         ),
                       ),
                     ),
                     const SizedBox(height: 40),
                     TextField(
                       controller: _passwordController,
-                      cursorColor: Colors.red,
+                      cursorColor: Color.fromARGB(255, 0, 29, 72),
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(
                             borderSide: BorderSide(
-                                color: Colors.red,
+                                color: Color.fromARGB(255, 0, 29, 72),
                                 width: 3,
                                 style: BorderStyle.solid)),
                         labelText: "密码",
-                        labelStyle:
-                            const TextStyle(color: Colors.red, fontSize: 16),
+                        labelStyle: const TextStyle(
+                            color: Color.fromARGB(255, 0, 29, 72),
+                            fontSize: 16),
                         enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.red)),
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(255, 0, 29, 72))),
                         focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.red)),
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(255, 0, 29, 72))),
                         suffixIcon: GestureDetector(
                           onTap: () {
                             _passwordIcon();
@@ -188,7 +170,8 @@ class _LoginPageState extends State<LoginPage> {
                             color: Colors.grey,
                           ),
                         ),
-                        prefixIcon: Icon(Icons.lock, color: Colors.red),
+                        prefixIcon: Icon(Icons.lock,
+                            color: Color.fromARGB(255, 0, 29, 72)),
                       ),
                       obscureText: !_showPassword,
                     ),
@@ -198,6 +181,11 @@ class _LoginPageState extends State<LoginPage> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () async {
+                          Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      Tabs(username: "yds", token: "123456")),
+                              (route) => false);
                           String name = _usernameController.text;
                           String password = _passwordController.text;
                           if (name.isEmpty || password.isEmpty) {
@@ -207,6 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                                 base64Encode(utf8.encode("$name:$password"));
                             final loginMess = await _loginVerify(textUser);
                             print("textUser = ${textUser}");
+
                             if (loginMess != null) {
                               //initJpush(name);
                               saveData(textUser);
@@ -225,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: Text(
                           "登陆",
-                          style: TextStyle(color: Colors.red, fontSize: 18),
+                          style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                       ),
                     ),

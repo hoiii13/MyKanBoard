@@ -6,7 +6,7 @@ import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:board_app/component/requestNetwork.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 
@@ -35,8 +35,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
   ScrollController _msgController = new ScrollController();
   StreamController<List> _streamController = StreamController();
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  /* FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin(); */
 
   RequestHttp httpCode = RequestHttp();
   final JPush jpush = JPush();
@@ -317,6 +317,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
 
   @override
   void initState() {
+    print("sendCom = ${widget.user_id}");
     _getComments(int.parse(widget.task_id));
     Future.delayed(Duration(seconds: 1), () {
       initJpush(widget.username);
@@ -333,11 +334,11 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
       _streamController.addError("error信息");
     });
 
-    var andriod = AndroidInitializationSettings('@mipmap/ic_launcher');
+    /* var andriod = AndroidInitializationSettings('@mipmap/ic_launcher');
     var iOS = IOSInitializationSettings();
     var initSettings = InitializationSettings(android: andriod, iOS: iOS);
     flutterLocalNotificationsPlugin.initialize(initSettings,
-        onSelectNotification: onSelectNotification);
+        onSelectNotification: onSelectNotification); */
 
     super.initState();
   }
@@ -360,14 +361,14 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
             )));
   }
 
-  showNotification(String title, String content) async {
+  /* showNotification(String title, String content) async {
     var andriod = AndroidNotificationDetails('channelId', 'channelName');
     var iOS = IOSNotificationDetails();
     var platform = NotificationDetails(android: andriod, iOS: iOS);
     await flutterLocalNotificationsPlugin.show(
         DateTime.now().millisecondsSinceEpoch >> 10, title, content, platform,
         payload: '通知栏');
-  }
+  } */
 
   //打开聊天页面显示最新的记录
   void _jumpBottom() {
@@ -389,12 +390,12 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
         centerTitle: true,
         title: Text(
           widget.task_title,
-          style: const TextStyle(fontSize: 16, color: Colors.black),
+          style: const TextStyle(fontSize: 20, color: Colors.white),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.navigate_before,
-            color: Colors.grey,
+            color: Colors.white,
             size: 35,
           ),
           onPressed: () async {
@@ -424,7 +425,10 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     if (comments.isEmpty) {
       return const Expanded(
           child: Center(
-        child: Text("暂时没有对话"),
+        child: Text(
+          "暂时没有对话",
+          style: TextStyle(fontSize: 18),
+        ),
       ));
     } else {
       //_jumpBottom();
@@ -514,12 +518,12 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
                 keyboardType: TextInputType.multiline,
                 cursorColor: Colors.black,
                 decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  hintText: "请输入",
-                  contentPadding: EdgeInsets.fromLTRB(5, 8, 5, 8),
-                ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(borderSide: BorderSide.none),
+                    hintText: "请输入",
+                    contentPadding: EdgeInsets.fromLTRB(5, 8, 5, 8),
+                    hintStyle: TextStyle(fontSize: 17)),
                 controller: _textController,
               ),
             )),
@@ -532,7 +536,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
               },
               child: const Text(
                 "@",
-                style: TextStyle(color: Colors.black, fontSize: 20),
+                style: TextStyle(
+                    color: Color.fromARGB(255, 0, 29, 72), fontSize: 20),
               ),
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all(const Size(5, 5))),
@@ -556,7 +561,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
               },
               child: const Text(
                 "发送",
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             )
           ],
@@ -601,7 +606,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
                           contentPadding:
                               EdgeInsets.fromLTRB(20, 0, _width * 0.2, 0),
                           leading: CircleAvatar(
-                            backgroundColor: Colors.red,
+                            backgroundColor: Color.fromARGB(255, 191, 64, 100),
                             child: _people[index]["name"] == null ||
                                     _people[index]["name"] == ""
                                 ? Text(
@@ -663,7 +668,7 @@ class BubbleWidget extends StatelessWidget {
     TimeChange timeChange = TimeChange();
     final _width = MediaQuery.of(context).size.width; //得到屏幕的宽
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(10.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         textDirection: isMyself ? TextDirection.rtl : TextDirection.ltr,
@@ -673,9 +678,10 @@ class BubbleWidget extends StatelessWidget {
               //头像部分
               child: Text(
                 "${name.toString().substring(0, 1)}", //取名字的前2个字
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white, fontSize: 18),
               ),
-              backgroundColor: Colors.red,
+              radius: 23,
+              backgroundColor: Color.fromARGB(255, 191, 64, 100),
             ),
             /* child: CircleAvatar(
               backgroundImage: NetworkImage(avatar),
@@ -693,7 +699,7 @@ class BubbleWidget extends StatelessWidget {
                     : AlignmentDirectional.topStart,
                 child: Text(
                   name,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ), //用户名部分
                 //color: Colors.blue,
               ),
@@ -713,7 +719,10 @@ class BubbleWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5.0),
                   color: Colors.grey[200],
                 ),
-                child: Text(text),
+                child: Text(
+                  text,
+                  style: TextStyle(fontSize: 15),
+                ),
               ),
               Container(
                 padding: const EdgeInsets.only(top: 5),

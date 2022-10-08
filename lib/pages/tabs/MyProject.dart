@@ -147,7 +147,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
         centerTitle: true, //标题居中
         title: const Text(
           "我的项目",
-          style: TextStyle(fontSize: 15, color: Colors.black),
+          style: TextStyle(fontSize: 20, color: Colors.white),
         ),
         elevation: 0.5, //阴影高度
       ),
@@ -169,15 +169,18 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
             return Column(
               children: [
                 ListTile(
-                  title: Text(_myProjects[index]["name"]),
+                  title: Text(
+                    _myProjects[index]["name"],
+                    style: TextStyle(fontSize: 18),
+                  ),
                   subtitle: users.length != _myProjects.length
                       ? Text(
                           "创建人：加载中...",
-                          style: TextStyle(fontSize: 13),
+                          style: TextStyle(fontSize: 15),
                         )
                       : Text(
                           "创建人：${_creatorList[index]["username"]}",
-                          style: TextStyle(fontSize: 13),
+                          style: TextStyle(fontSize: 15),
                         ),
                   //subtitle: Text("创建人：${users[index]["username"]}"),
                   onTap: () {
