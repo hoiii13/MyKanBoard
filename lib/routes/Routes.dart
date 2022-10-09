@@ -2,7 +2,6 @@ import 'package:board_app/pages/chatProject.dart';
 import 'package:flutter/material.dart';
 import '../pages/Tabs.dart';
 import 'package:board_app/pages/Login.dart';
-import '../pages/test2.dart';
 import '../pages/tabs/MyMessage.dart';
 
 final routes = {
@@ -15,7 +14,6 @@ final routes = {
         project_id: project_id,
       ),
   '/': (context) => LoginPage(),
-  '/test': (context) => Test2Page(),
   '/message': (context, {user_id, username}) => MyMessagePage(
         user_id: user_id,
         username: username,

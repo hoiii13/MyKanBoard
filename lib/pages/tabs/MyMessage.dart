@@ -23,9 +23,13 @@ class _MyMessagePageState extends State<MyMessagePage> {
   RequestHttp httpCode = RequestHttp();
   TimeChange timeChange = TimeChange();
   final JPush jpush = JPush();
+  ScrollController _scrollController = ScrollController();
 
   List _messageList = [];
   List _TaskDetails = [];
+  List _tasksList = [];
+  List _isClicks = [false];
+  //bool _isClick = false;
 
   Future<void> _onRefresh() async {
     print("执行刷新");
@@ -54,47 +58,9 @@ class _MyMessagePageState extends State<MyMessagePage> {
     setState(() {
       Allprojects = _projects;
       for (var i = 0; i < Allprojects.length; i++) {
-        //_getData(int.parse(Allprojects[i]["id"]));
-        Future.delayed(Duration(seconds: 1), () async {
-          final Activities =
-              await _getProjectActivity(int.parse(Allprojects[i]["id"]));
-          print("chang = ${Activities.length}   ${Allprojects[i]["id"]}");
-          _Allactivities.addAll(Activities);
-        });
+        _getData(int.parse(Allprojects[i]["id"]));
       }
     });
-  }
-
-//得到动态记录
-  List _Allactivities = [];
-  List _MyActivityAbouts = [];
-  List _myTasks = [];
-  _getProjectActivity(int id) async {
-    List _activities = [];
-    final response = await httpCode.requestHttpCode(
-        json.encode({
-          "jsonrpc": "2.0",
-          "method": "getProjectActivity",
-          "id": 942472945,
-          "params": {"project_id": id}
-        }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
-
-    if (response.statusCode == 200) {
-      final res = await response.stream.bytesToString();
-      final activities = json.decode(res);
-      setState(() {
-        _activities = activities["result"];
-      });
-      print("lll = ${_activities.length}");
-      /* setState(() {
-        _Allactivities.addAll(_activities);
-        print("ppp = ${_Allactivities.length}");
-      }); */
-    } else {
-      print(response.reasonPhrase);
-    }
-    return _activities;
   }
 
   List _Alltasks = [];
@@ -213,75 +179,48 @@ class _MyMessagePageState extends State<MyMessagePage> {
 
   @override
   Widget build(BuildContext context) {
-    /* print("ooo = ${Allprojects.length}");
-    if (_Allactivities.isNotEmpty) {
-      List activity = [];
-      print("len = ${_Allactivities.length}");
-      for (var i = 0; i < _Allactivities.length; i++) {
-        if (_Allactivities[i]["event_name"] == "comment.create") {
-          //print("All == ${_Allactivities[i]["comment"]}");
-          if (_Allactivities[i]["comment"]["comment"]
-                  .contains("@" + widget.username) ==
-              true) {
-            _MyActivityAbouts.add(_Allactivities[i]);
-          }
-        } else if (_Allactivities[i]["event_name"] == "task.assign_change") {
-          if (_Allactivities[i]["event_title"]
-                      .contains("指派给了 " + widget.username) ==
-                  true ||
-              _Allactivities[i]["event_title"]
-                      .contains("指派给了 " + widget.name) ==
-                  true) {
-            _MyActivityAbouts.add(_Allactivities[i]);
-          }
-        }
-      }
-      print("object == ${_MyActivityAbouts.length}");
-      for (var i = 0; i < _MyActivityAbouts.length; i++) {
-        if (_myTasks.contains(_MyActivityAbouts[i]["task_id"]) == false) {
-          _myTasks.add(_MyActivityAbouts[i]);
-        }
-      }
-      // print("object == ${_myTasks.length}");
-    }
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true, //标题居中
-        title: const Text(
-          "我的消息",
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-        elevation: 0.5, //阴影高度
-      ),
-      body: ListView.builder(
-          itemCount: _myTasks.length,
-          itemBuilder: ((context, index) {
-            return Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Card(
-                    elevation: 5,
-                    child: Column(
-                      children: [Text("${_myTasks[index]["task"]["title"]}")],
-                    ),
-                  )
-                ],
-              ),
-            );
-          })),
-    ); */
-    //筛选出@当前用户的
     if (_AllComments.isNotEmpty) {
+      //过滤出@用户的评论
       _messageList = _AllComments.where((v) =>
           v["comment"].contains("@" + widget.username + " ") == true ||
           v["comment"].contains("@" + widget.username) == true).toList();
       _messageList.sort(
           (a, b) => b["date_modification"].compareTo(a["date_modification"]));
+      //整合所有评论中的任务是哪些
+      _tasksList = [];
+      if (_messageList.isNotEmpty) {
+        _tasksList.add(_messageList[0]);
+      }
+
+      for (var i = 0; i < _messageList.length; i++) {
+        if (_tasksList.length != 0) {
+          int len = _tasksList.length;
+          int num = 0;
+          for (var j = 0; j < len; j++) {
+            if (_tasksList[j]["task_id"] != _messageList[i]["task_id"]) {
+              num++;
+            }
+          }
+          if (num == len) {
+            _tasksList.add(_messageList[i]);
+            _isClicks.add(false);
+          }
+        }
+      }
+      //根据整理出的任务，得到相应任务的详情
+      _TaskDetails = [];
+      for (var i = 0; i < _tasksList.length; i++) {
+        for (var j = 0; j < _Alltasks.length; j++) {
+          if (_tasksList[i]["task_id"] == _Alltasks[j]["id"]) {
+            _TaskDetails.add(_Alltasks[j]);
+          }
+        }
+      }
     } else {
       _messageList = [];
+      _tasksList = [];
     }
-
+    final _width = MediaQuery.of(context).size.width; //得到屏幕的宽高
     return Scaffold(
       appBar: AppBar(
         centerTitle: true, //标题居中
@@ -298,22 +237,21 @@ class _MyMessagePageState extends State<MyMessagePage> {
             _onRefresh();
           });
         },
-        child: _buildMessage(_messageList),
+        child: _buildTasksList(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _onRefresh();
+          _scrollController.animateTo(.0,
+              duration: Duration(seconds: 2), curve: Curves.ease);
         },
-        child: Icon(
-          Icons.refresh,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.arrow_upward, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildMessage(List messageList) {
-    if (messageList.isEmpty) {
+  //任务列表
+  _buildTasksList() {
+    if (_tasksList.isEmpty) {
       return Container(
           child: const Center(
         child: Text(
@@ -323,140 +261,224 @@ class _MyMessagePageState extends State<MyMessagePage> {
             color: Color.fromARGB(255, 0, 29, 72),
           ),
         ),
-        /* child: CircularProgressIndicator(
-            color: Color.fromARGB(255, 148, 196, 235)), */
       ));
     } else {
-      _TaskDetails = []; //为了防止上面异步请求而更新其他的List而造成多次执行这里，所以这里要将_TaskDetails清空
-      for (var i = 0; i < _messageList.length; i++) {
-        for (var j = 0; j < _Alltasks.length; j++) {
-          if (_messageList[i]["task_id"] == _Alltasks[j]["id"]) {
-            _TaskDetails.add(_Alltasks[j]);
-            break;
-          }
-        }
-      }
-
-      final _width = MediaQuery.of(context).size.width; //得到屏幕的宽
-      return ListView.builder(
-        itemCount: messageList.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Card(
-                  elevation: 5,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      return Scrollbar(
+        child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _tasksList.length,
+            itemBuilder: ((context, index) {
+              return Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Card(
+                      elevation: 5,
+                      child: Column(
                         children: [
-                          //标签部分
                           Container(
-                            margin: EdgeInsets.all(5),
-                            height: 32,
+                            //color: Color.fromARGB(255, 0, 29, 72),
                             decoration: BoxDecoration(
-                                //标签的阴影部分
                                 boxShadow: [
                                   BoxShadow(
-                                      blurRadius: 5.0,
-                                      color: Colors.grey.withOpacity(1))
+                                      blurRadius: 5.0, color: Colors.white)
                                 ],
                                 color: Color.fromARGB(255, 0, 29, 72),
-                                border: Border.all(
-                                  color: Color.fromARGB(255, 0, 29, 72),
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(4))
+                                //BorderRadius.all(Radius.circular(0,0,10,20))
                                 ),
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(6))),
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "@ 我",
-                                    style: TextStyle(color: Colors.white),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                          Container(
-                            margin: EdgeInsets.all(5),
-                            // color: Colors.black,
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextButton(
-                                  child: Text(
-                                    "点击查看任务",
-                                    style: TextStyle(
-                                        color: Color.fromARGB(255, 0, 29, 72)),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                            builder: (_) => MyTaskDetailPage(
-                                                  taskDetail:
-                                                      _TaskDetails[index],
-                                                  user_id: widget.user_id,
-                                                  username: widget.username,
-                                                )));
-                                  },
-                                ),
                                 Container(
-                                  child: Icon(
-                                    Icons.navigate_next,
-                                    color: Color.fromARGB(255, 0, 29, 72),
-                                  ),
-                                ),
+                                    margin: EdgeInsets.fromLTRB(10, 5, 0, 0),
+
+                                    // width: _width * 0.9,
+                                    //height: 32,
+                                    /* decoration: BoxDecoration(
+                                        boxShadow: [
+                                          BoxShadow(
+                                              blurRadius: 5.0,
+                                              color: Colors.white)
+                                        ],
+                                        color: _isClicks[index]
+                                            ? Color.fromARGB(255, 0, 29, 72)
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(6))), */
+                                    child: _isClicks[index]
+                                        ? Text(
+                                            "任务:  ${_TaskDetails[index]["title"]}",
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                color: Colors.grey),
+                                          )
+                                        : Text(
+                                            "任务:  ${_TaskDetails[index]["title"]}",
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                color: Colors.white),
+                                          )),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(
+                                      () {
+                                        _isClicks[index] = !_isClicks[index];
+                                      },
+                                    );
+                                  },
+                                  icon: _isClicks[index]
+                                      ? Icon(
+                                          Icons.expand_more,
+                                          color: Colors.grey,
+                                        )
+                                      : Icon(
+                                          Icons.chevron_right,
+                                          color: Colors.white,
+                                        ),
+                                )
                               ],
                             ),
-                          )
+                          ),
+                          _buildLastComment(
+                              _isClicks[index],
+                              _tasksList[index]["task_id"],
+                              _TaskDetails[index]["title"],
+                              _TaskDetails[index]["project_id"]),
+                          //Container(child: Text("aaa")),
+                          _buildCommentList(
+                              _tasksList[index]["task_id"],
+                              _isClicks[index],
+                              _TaskDetails[index]["title"],
+                              _TaskDetails[index]["project_id"])
                         ],
                       ),
-                      Container(
-                          margin: EdgeInsets.fromLTRB(10, 0, 0, 10),
-                          child: _TaskDetails.length != 0
-                              ? Text("任务：${_TaskDetails[index]["title"]}",
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.grey))
-                              : Text("加载中...",
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.grey))),
-                      Container(
-                          width: _width * 0.7,
-                          margin: EdgeInsets.fromLTRB(10, 5, 0, 5),
-                          child: messageList[index]["name"] == null ||
-                                  messageList[index]["name"] == ""
-                              ? Text(
-                                  "${messageList[index]["username"]} 评论: ${messageList[index]["comment"]}",
-                                  style: TextStyle(color: Colors.black),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                )
-                              : Text(
-                                  "${messageList[index]["name"]} 评论: ${messageList[index]["comment"]}",
-                                  style: TextStyle(color: Colors.black),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                )),
-                      Container(
-                        margin: EdgeInsets.all(10),
-                        child: Text(
-                          "评论时间：${timeChange.timeStamp(messageList[index]["date_modification"])}",
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          );
-        },
+                    )
+                  ],
+                ),
+              );
+            })),
       );
     }
+  }
+
+//最新一条@
+  _buildLastComment(
+      bool _isClick, String task_id, String title, String project_id) {
+    final taskComments =
+        _messageList.where((v) => v["task_id"] == task_id).toList();
+    return Visibility(
+        visible: !_isClick,
+        child: _commentView(taskComments, 0, title, project_id, _isClick));
+  }
+
+//@详情
+  _commentView(final taskComment, int index, String title, String project_id,
+      bool _isClick) {
+    return Column(
+      children: [
+        Visibility(
+          visible: _isClick,
+          child: Divider(color: Color.fromARGB(255, 0, 29, 72)),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Visibility(
+                  visible: !_isClick,
+                  child: Container(
+                      alignment: Alignment.topLeft,
+                      margin: EdgeInsets.fromLTRB(10, 15, 5, 0),
+                      child: Text(
+                        "最新消息：",
+                        style: TextStyle(fontSize: 16),
+                      )),
+                ),
+                Container(
+                  alignment: Alignment.topLeft,
+                  margin: EdgeInsets.fromLTRB(10, 15, 5, 0),
+                  child: taskComment[index]["name"] == "" ||
+                          taskComment[index]["name"] == null
+                      ? Text(
+                          "${taskComment[index]["username"]}",
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromARGB(255, 191, 64, 100)),
+                        )
+                      : Text(
+                          "${taskComment[index]["name"]}",
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromARGB(255, 191, 64, 100)),
+                        ),
+                ),
+                Container(
+                    alignment: Alignment.topLeft,
+                    margin: EdgeInsets.fromLTRB(0, 15, 5, 0),
+                    child: Text(
+                      "@了你",
+                      style: TextStyle(fontSize: 16),
+                    )),
+              ],
+            ),
+            Visibility(
+              visible: _isClick,
+              child: Container(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => ChatProjectPage(
+                                task_id: taskComment[index]["task_id"],
+                                user_id: widget.user_id,
+                                task_title: title,
+                                project_id: project_id,
+                                username: widget.username,
+                              )));
+                    },
+                    icon: Icon(Icons.chevron_right)),
+              ),
+            )
+          ],
+        ),
+        Container(
+          margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+          child: ListTile(
+            title: Text(
+              "${taskComment[index]["comment"]}",
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+            subtitle: Text(
+              "${timeChange.timeStamp(
+                taskComment[index]["date_modification"],
+              )}",
+              style: TextStyle(fontSize: 13),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+//每个任务下的@列表
+  _buildCommentList(
+      String task_id, bool _isClick, String title, String project_id) {
+    final taskComments =
+        _messageList.where((v) => v["task_id"] == task_id).toList();
+    return Visibility(
+        visible: _isClick,
+        child: ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: taskComments.length,
+            itemBuilder: ((context, index) {
+              return _commentView(
+                  taskComments, index, title, project_id, _isClick);
+            })));
   }
 }
 
