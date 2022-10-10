@@ -1,8 +1,11 @@
 import 'package:board_app/component/receivedJpush.dart';
+import 'package:board_app/pages/ChangeIp.dart';
+import 'package:board_app/pages/WriteIP.dart';
 import 'package:board_app/pages/Login.dart';
 import 'package:board_app/pages/chatProject.dart';
 import 'package:board_app/pages/tabs/MyMessage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -14,12 +17,14 @@ class MyCenterPage extends StatefulWidget {
   final userToken;
   final user_id;
   final name;
+  final ipText;
   MyCenterPage(
       {Key? key,
       this.username,
       required this.userToken,
       this.user_id,
-      this.name})
+      this.name,
+      required this.ipText})
       : super(key: key);
 
   @override
@@ -36,7 +41,8 @@ class _MyCenterPageState extends State<MyCenterPage> {
   void _getMe(String baseCode) async {
     final response = await httpCode.requestHttpCode(
         json.encode({"jsonrpc": "2.0", "method": "getMe", "id": 1718627783}),
-        baseCode);
+        baseCode,
+        widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final userMess = json.decode(res);
@@ -55,7 +61,8 @@ class _MyCenterPageState extends State<MyCenterPage> {
           "method": "getApplicationRoles",
           "id": 317154243
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -72,7 +79,9 @@ class _MyCenterPageState extends State<MyCenterPage> {
     final result = await prefs.remove(password);
     if (result) {
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+          MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  LoginPage(ipText: widget.ipText)),
           (route) => false);
     }
     print("delete = $result");
@@ -142,216 +151,240 @@ class _MyCenterPageState extends State<MyCenterPage> {
     if (_userMessage.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          centerTitle: true, //标题居中
-          title: const Text(
-            "个人中心",
-            style: TextStyle(fontSize: 20, color: Colors.white),
-          ),
-          elevation: 0.5, //阴影高度
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         ),
+        backgroundColor: Colors.white,
         body: Center(
             child: CircularProgressIndicator(
                 color: Color.fromARGB(255, 0, 29, 72))),
       );
     } else {
       return Scaffold(
-          appBar: AppBar(
-            centerTitle: true, //标题居中
-            title: const Text(
-              "个人中心",
-              style: TextStyle(fontSize: 20, color: Colors.white),
-            ),
-            elevation: 0.5, //阴影高度
-          ),
-          body: Container(
-            child: Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    //头像
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                      child: CircleAvatar(
-                        backgroundColor: Color.fromARGB(255, 191, 64, 100),
-                        radius: 35,
-                        child: _userMessage["name"] == ""
-                            ? Text(
-                                _userMessage["username"]
-                                    .toString()
-                                    .substring(0, 1),
-                                style: const TextStyle(
-                                    fontSize: 23, color: Colors.white),
-                              )
-                            : Text(
-                                _userMessage["name"].toString().substring(0, 1),
-                                style: const TextStyle(
-                                    fontSize: 23, color: Colors.white),
-                              ),
-                      ),
+        appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        backgroundColor: Colors.white,
+        body: Column(
+          children: <Widget>[
+            Container(
+              child: Row(
+                children: <Widget>[
+                  //头像
+                  Container(
+                    //color: Colors.green,
+                    margin: EdgeInsets.fromLTRB(20, 0, 10, 10),
+                    child: CircleAvatar(
+                      backgroundColor: Color.fromARGB(255, 191, 64, 100),
+                      radius: 37,
+                      child: _userMessage["name"] == ""
+                          ? Text(
+                              _userMessage["username"]
+                                  .toString()
+                                  .substring(0, 1),
+                              style: const TextStyle(
+                                  fontSize: 23, color: Colors.white),
+                            )
+                          : Text(
+                              _userMessage["name"].toString().substring(0, 1),
+                              style: const TextStyle(
+                                  fontSize: 23, color: Colors.white),
+                            ),
                     ),
-                    //用户名和姓名
-                    Container(
-                      width: _width * 0.6,
-                      margin: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                      decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 238, 238, 238),
-                            style: BorderStyle.solid,
-                            width: 2.0,
+                  ),
+                  //用户名和姓名
+                  Container(
+                    width: _width * 0.7,
+                    margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            _userMessage["username"],
+                            style: TextStyle(
+                                fontSize: 24,
+                                color: Color.fromARGB(255, 0, 29, 72)),
                           ),
-                          borderRadius: BorderRadius.circular(5.0)),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
-                            child: Container(
-                              child: Row(
-                                children: <Widget>[
+                        ),
+                        Container(
+                          margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                  child: _userMessage["name"] == ""
+                                      ? Text("姓名：无",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Color.fromARGB(
+                                                  255, 0, 29, 72)))
+                                      : Text(
+                                          "姓名：${_userMessage["name"]}",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Color.fromARGB(
+                                                  255, 0, 29, 72)),
+                                        )),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
                                   Container(
-                                    width: _width * 0.2,
-                                    child: Text(
-                                      "用户名：",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          color:
-                                              Color.fromARGB(255, 0, 29, 72)),
+                                    child: TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        ChangeIPPage(
+                                                          ipText: widget.ipText,
+                                                        )));
+                                      },
+                                      child: Text(
+                                        "切换ip",
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
                                     ),
+                                    /* child: Text(
+                                      "切换ip",
+                                      style: TextStyle(color: Colors.grey),
+                                    ), */
                                   ),
                                   Container(
-                                    child: Text(
-                                      _userMessage["username"],
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          color:
-                                              Color.fromARGB(255, 0, 29, 72)),
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.chevron_right,
+                                        color: Colors.grey,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder:
+                                                    ((BuildContext context) =>
+                                                        ChangeIPPage(
+                                                          ipText: widget.ipText,
+                                                        ))));
+                                        /* Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    ChangeIpPage())); */
+                                      },
                                     ),
                                   )
                                 ],
-                              ),
-                            ),
+                              )
+                            ],
                           ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-                            child: Container(
-                              child: Row(
-                                children: <Widget>[
-                                  Container(
-                                    width: _width * 0.2,
-                                    child: Text(
-                                      "姓名：",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          color:
-                                              Color.fromARGB(255, 0, 29, 72)),
-                                    ),
-                                  ),
-                                  Container(
-                                      child: _userMessage["name"] == ""
-                                          ? Text("无",
-                                              style: TextStyle(
-                                                  fontSize: 18,
-                                                  color: Color.fromARGB(
-                                                      255, 0, 29, 72)))
-                                          : Text(
-                                              _userMessage["name"],
-                                              style: TextStyle(
-                                                  fontSize: 18,
-                                                  color: Color.fromARGB(
-                                                      255, 0, 29, 72)),
-                                            ))
-                                ],
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(10, 30, 10, 0),
-                  child: Container(
-                    // width: _width * 0.8,
-                    decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 238, 238, 238),
-                          style: BorderStyle.solid,
-                          width: 2.0,
                         ),
-                        borderRadius: BorderRadius.circular(5.0)),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.mail,
-                              color: Color.fromARGB(255, 0, 29, 72)),
-                          title: const Text(
-                            "邮箱:",
-                            style: TextStyle(
-                                color: Color.fromARGB(255, 0, 29, 72),
-                                fontSize: 18),
-                          ),
-                          trailing: _userMessage["email"] == ""
-                              ? Text(
-                                  "无",
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Color.fromARGB(255, 0, 29, 72)),
-                                )
-                              : Text(
-                                  "${_userMessage["email"]}",
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Color.fromARGB(255, 0, 29, 72)),
-                                ),
-                        ),
-                        const Divider(),
-                        ListTile(
-                          leading: const Icon(
-                            Icons.emoji_people,
-                            color: Color.fromARGB(255, 0, 29, 72),
-                          ),
-                          title: const Text(
-                            "角色:",
-                            style: TextStyle(
-                                color: Color.fromARGB(255, 0, 29, 72),
-                                fontSize: 18),
-                          ),
-                          trailing: _userMessage["role"] == ""
-                              ? Text(
-                                  "无",
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Color.fromARGB(255, 0, 29, 72)),
-                                )
-                              : Text(
-                                  "${_appRoles[_userMessage["role"]]}",
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Color.fromARGB(255, 0, 29, 72)),
-                                ),
-                        )
                       ],
                     ),
                   ),
-                ),
-                Container(
-                  width: _width * 0.5,
-                  height: 50,
-                  margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      jpush.deleteAlias();
-                      deleteData("password");
-                    },
-                    child: Text("退出登录",
-                        style: TextStyle(fontSize: 18, color: Colors.white)),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ));
+            Expanded(
+                child: Container(
+                    color: Colors.grey[200],
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                          child: Container(
+                            color: Colors.white,
+                            width: _width,
+                            /* decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  style: BorderStyle.solid,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(5.0)), */
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.mail,
+                                      color: Color.fromARGB(255, 0, 29, 72)),
+                                  title: const Text(
+                                    "邮箱:",
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 0, 29, 72),
+                                        fontSize: 17),
+                                  ),
+                                  trailing: _userMessage["email"] == ""
+                                      ? Text(
+                                          "无",
+                                          style: TextStyle(
+                                              fontSize: 17,
+                                              color: Color.fromARGB(
+                                                  255, 0, 29, 72)),
+                                        )
+                                      : Text(
+                                          "${_userMessage["email"]}",
+                                          style: TextStyle(
+                                              fontSize: 17,
+                                              color: Color.fromARGB(
+                                                  255, 0, 29, 72)),
+                                        ),
+                                ),
+                                const Divider(
+                                  color: Color.fromARGB(255, 238, 238, 238),
+                                  thickness: 2,
+                                ),
+                                ListTile(
+                                  leading: const Icon(
+                                    Icons.emoji_people,
+                                    color: Color.fromARGB(255, 0, 29, 72),
+                                  ),
+                                  title: const Text(
+                                    "角色:",
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 0, 29, 72),
+                                        fontSize: 17),
+                                  ),
+                                  trailing: _userMessage["role"] == ""
+                                      ? Text(
+                                          "无",
+                                          style: TextStyle(
+                                              fontSize: 17,
+                                              color: Color.fromARGB(
+                                                  255, 0, 29, 72)),
+                                        )
+                                      : Text(
+                                          "${_appRoles[_userMessage["role"]]}",
+                                          style: TextStyle(
+                                              fontSize: 17,
+                                              color: Color.fromARGB(
+                                                  255, 0, 29, 72)),
+                                        ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: _width * 0.5,
+                          height: 50,
+                          margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              jpush.deleteAlias();
+                              deleteData("password");
+                            },
+                            child: Text("退出登录",
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white)),
+                          ),
+                        ),
+                      ],
+                    )))
+          ],
+        ),
+      );
     }
   }
 }

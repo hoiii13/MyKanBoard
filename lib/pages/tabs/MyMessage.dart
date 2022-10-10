@@ -12,7 +12,9 @@ class MyMessagePage extends StatefulWidget {
   final user_id;
   final username;
   final name;
-  MyMessagePage({Key? key, this.user_id, this.username, this.name})
+  final ipText;
+  MyMessagePage(
+      {Key? key, this.user_id, this.username, this.name, required this.ipText})
       : super(key: key);
 
   @override
@@ -47,7 +49,8 @@ class _MyMessagePageState extends State<MyMessagePage> {
     final response = await httpCode.requestHttpCode(
         json.encode(
             {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212}),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
       throw ("error");
@@ -74,7 +77,8 @@ class _MyMessagePageState extends State<MyMessagePage> {
           "id": 827046470,
           "params": [id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -110,7 +114,8 @@ class _MyMessagePageState extends State<MyMessagePage> {
           "id": 148484683,
           "params": {"task_id": task_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final comments = json.decode(res);
@@ -226,10 +231,11 @@ class _MyMessagePageState extends State<MyMessagePage> {
         centerTitle: true, //标题居中
         title: const Text(
           "我的消息",
-          style: TextStyle(fontSize: 20, color: Colors.white),
+          style: TextStyle(fontSize: 18, color: Colors.white),
         ),
         elevation: 0.5, //阴影高度
       ),
+      backgroundColor: Colors.grey[200],
       body: RefreshIndicator(
         color: Color.fromARGB(255, 0, 29, 72),
         onRefresh: () async {
@@ -293,29 +299,15 @@ class _MyMessagePageState extends State<MyMessagePage> {
                               children: [
                                 Container(
                                     margin: EdgeInsets.fromLTRB(10, 5, 0, 0),
-
-                                    // width: _width * 0.9,
-                                    //height: 32,
-                                    /* decoration: BoxDecoration(
-                                        boxShadow: [
-                                          BoxShadow(
-                                              blurRadius: 5.0,
-                                              color: Colors.white)
-                                        ],
-                                        color: _isClicks[index]
-                                            ? Color.fromARGB(255, 0, 29, 72)
-                                            : Colors.white,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(6))), */
                                     child: _isClicks[index]
                                         ? Text(
-                                            "任务:  ${_TaskDetails[index]["title"]}",
+                                            "${_TaskDetails[index]["title"]}",
                                             style: TextStyle(
                                                 fontSize: 18,
                                                 color: Colors.grey),
                                           )
                                         : Text(
-                                            "任务:  ${_TaskDetails[index]["title"]}",
+                                            "${_TaskDetails[index]["title"]}",
                                             style: TextStyle(
                                                 fontSize: 18,
                                                 color: Colors.white),
@@ -437,6 +429,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
                                 task_title: title,
                                 project_id: project_id,
                                 username: widget.username,
+                                ipText: widget.ipText,
                               )));
                     },
                     icon: Icon(Icons.chevron_right)),
@@ -469,12 +462,17 @@ class _MyMessagePageState extends State<MyMessagePage> {
       String task_id, bool _isClick, String title, String project_id) {
     final taskComments =
         _messageList.where((v) => v["task_id"] == task_id).toList();
+    int len = taskComments.length;
+    if (taskComments.length > 10) {
+      len = 10;
+    }
+
     return Visibility(
         visible: _isClick,
         child: ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            itemCount: taskComments.length,
+            itemCount: len,
             itemBuilder: ((context, index) {
               return _commentView(
                   taskComments, index, title, project_id, _isClick);

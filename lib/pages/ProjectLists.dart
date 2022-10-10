@@ -12,8 +12,14 @@ class ProjectListsPage extends StatefulWidget {
   final project_id;
   final user_id;
   final username;
+  final ipText;
   const ProjectListsPage(
-      {Key? key, this.project_id, this.title, this.user_id, this.username})
+      {Key? key,
+      this.project_id,
+      this.title,
+      this.user_id,
+      this.username,
+      required this.ipText})
       : super(key: key);
 
   @override
@@ -53,7 +59,8 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
           "id": 827046470,
           "params": [project_id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final projectBoard = json.decode(res);
@@ -84,7 +91,8 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
           "id": 1769674781,
           "params": {"user_id": user_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final userInfo = json.decode(res);
@@ -107,7 +115,8 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
           "id": 15775829,
           "params": [task_id, project_id, 1, column_id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
 
@@ -300,10 +309,12 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
 
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => MyTaskDetailPage(
-                                taskDetail: tasksList[index],
-                                user_id: widget.user_id,
-                                //user_id: tasksList[index]["owner_id"],
-                                username: widget.username)));
+                                  taskDetail: tasksList[index],
+                                  user_id: widget.user_id,
+                                  //user_id: tasksList[index]["owner_id"],
+                                  username: widget.username,
+                                  ipText: widget.ipText,
+                                )));
                       },
                     ),
                     onLongPressStart: (LongPressStartDetails details) {

@@ -18,8 +18,16 @@ class Tabs extends StatefulWidget {
   final username;
   final token;
   final name;
-  Tabs({Key? key, this.index = 0, this.username, this.token, this.name})
-      : super(key: key);
+  final ipText;
+
+  Tabs({
+    Key? key,
+    this.index = 0,
+    this.username,
+    this.token,
+    this.name,
+    required this.ipText,
+  }) : super(key: key);
 
   @override
   State<Tabs> createState() => _TabsState(index);
@@ -39,7 +47,8 @@ class _TabsState extends State<Tabs> {
           "id": 1769674782,
           "params": {"username": username}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -66,7 +75,10 @@ class _TabsState extends State<Tabs> {
     final result = await prefs.remove(password);
     if (result) {
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+          MaterialPageRoute(
+              builder: (BuildContext context) => LoginPage(
+                    ipText: widget.ipText,
+                  )),
           (route) => false);
     }
     print("delete = $result");
@@ -76,7 +88,7 @@ class _TabsState extends State<Tabs> {
   void initState() {
     print("token = ${widget.token}");
     if (widget.token != null) {
-      Future.delayed(Duration(days: 7), () {
+      Future.delayed(Duration(days: 3), () {
         deleteData("password");
         print("我执行了");
       });
@@ -99,21 +111,29 @@ class _TabsState extends State<Tabs> {
     final List _pageList = [
       //页面集合
       MyTaskPage(
-          user_id: _userInfo["id"], username: _userInfo["username"]), //我的任务
+        user_id: _userInfo["id"],
+        username: _userInfo["username"],
+        ipText: widget.ipText,
+      ), //我的任务
       MyMessagePage(
         user_id: _userInfo["id"],
         username: _userInfo["username"],
         name: _userInfo["name"],
+        ipText: widget.ipText,
       ), //我的消息
       ProjectAboutpage(
-          username: widget.username,
-          userToken: widget.token,
-          user_id: _userInfo["id"]), //项目
+        username: widget.username,
+        userToken: widget.token,
+        user_id: _userInfo["id"],
+        ipText: widget.ipText,
+      ), //项目
       MyCenterPage(
-          username: widget.username,
-          userToken: widget.token,
-          user_id: _userInfo["id"],
-          name: _userInfo["name"]) //个人中心
+        username: widget.username,
+        userToken: widget.token,
+        user_id: _userInfo["id"],
+        name: _userInfo["name"],
+        ipText: widget.ipText,
+      ) //个人中心
     ];
     return Scaffold(
       body: _pageList[
@@ -136,7 +156,7 @@ class _TabsState extends State<Tabs> {
               icon: Icon(Icons.chat_bubble_outline), label: "消息"),
           BottomNavigationBarItem(
               icon: Icon(Icons.fact_check_rounded), label: "项目"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "个人"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "我"),
         ],
       ),
     );

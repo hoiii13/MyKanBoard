@@ -1,3 +1,4 @@
+import 'package:board_app/pages/ChangeIP.dart';
 import 'package:board_app/pages/Tabs.dart';
 import 'package:board_app/routes/Routes.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,8 @@ import 'package:board_app/pages/tabs/MyCenter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key? key}) : super(key: key);
+  final ipText;
+  LoginPage({Key? key, required this.ipText}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -23,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _showPassword = false;
   RequestHttp httpCode = RequestHttp();
   final JPush jpush = JPush();
+  String ip = "";
 
 //用于遮挡密码
   void _passwordIcon() {
@@ -49,10 +52,26 @@ class _LoginPageState extends State<LoginPage> {
               builder: (BuildContext context) => Tabs(
                     username: loginMess["username"],
                     token: passwordKey,
+                    ipText: ip,
                   )),
           (route) => false);
     }
-    print("pass = ${passwordKey}");
+    print("passLogin = ${passwordKey}");
+    //return passwordKey;
+  }
+
+  readIP(String ipAddress) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final ipKey = await prefs.getString(ipAddress);
+    ip = ipKey.toString();
+    /*  if (ipKey != null) {
+      //final loginMess = await _loginVerify(passwordKey);
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (BuildContext context) => LoginPage(ipText: ip)),
+          (route) => false);
+    } */
+    print("ipKeyLogin = ${ipKey}");
     //return passwordKey;
   }
 
@@ -65,7 +84,8 @@ class _LoginPageState extends State<LoginPage> {
     Map? _userMessage;
     final response = await httpCode.requestHttpCode(
         json.encode({"jsonrpc": "2.0", "method": "getMe", "id": 1718627783}),
-        baseCode);
+        baseCode,
+        ip);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final userMess = json.decode(res);
@@ -81,7 +101,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
+    readIP("ipAddress");
     readData("password");
+
     super.initState();
   }
 
@@ -181,11 +203,6 @@ class _LoginPageState extends State<LoginPage> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () async {
-                          Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      Tabs(username: "yds", token: "123456")),
-                              (route) => false);
                           String name = _usernameController.text;
                           String password = _passwordController.text;
                           if (name.isEmpty || password.isEmpty) {
@@ -202,8 +219,10 @@ class _LoginPageState extends State<LoginPage> {
                               Navigator.of(context).pushAndRemoveUntil(
                                   MaterialPageRoute(
                                       builder: (BuildContext context) => Tabs(
-                                          username: _usernameController.text,
-                                          token: textUser)),
+                                            username: _usernameController.text,
+                                            token: textUser,
+                                            ipText: ip,
+                                          )),
                                   (route) => false);
                               ToastPosition.toast(context, "登陆成功");
                             } else {
@@ -218,6 +237,18 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
+                    Container(
+                      alignment: Alignment.topLeft,
+                      child: TextButton(
+                        child: Text("修改IP地址"),
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) => ChangeIPPage(
+                                    ipText: ip,
+                                  )));
+                        },
+                      ),
+                    )
                   ],
                 ),
               )

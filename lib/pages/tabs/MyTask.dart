@@ -13,8 +13,14 @@ import 'package:jpush_flutter/jpush_flutter.dart';
 class MyTaskPage extends StatefulWidget {
   final user_id;
   final username;
-  MyTaskPage({Key? key, required this.user_id, this.username})
-      : super(key: key);
+  final ipText;
+
+  MyTaskPage({
+    Key? key,
+    required this.user_id,
+    this.username,
+    required this.ipText,
+  }) : super(key: key);
 
   @override
   State<MyTaskPage> createState() => _MyTaskPageState();
@@ -54,7 +60,8 @@ class _MyTaskPageState extends State<MyTaskPage>
           "id": 887036325,
           "params": [id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final projectColumns = json.decode(res);
@@ -91,7 +98,8 @@ class _MyTaskPageState extends State<MyTaskPage>
           "id": 15775829,
           "params": [task_id, project_id, 1, column_id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
 
@@ -112,7 +120,8 @@ class _MyTaskPageState extends State<MyTaskPage>
     final response = await httpCode.requestHttpCode(
         json.encode(
             {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212}),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
@@ -144,7 +153,8 @@ class _MyTaskPageState extends State<MyTaskPage>
           "id": 827046470,
           "params": [id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -163,6 +173,8 @@ class _MyTaskPageState extends State<MyTaskPage>
       if (mounted) {
         setState(() {
           _list = _tasks;
+          /* final taskAbout =
+              _list.where((v) => v["owner_id"] == widget.user_id).toList(); */
           final taskAbout =
               _list.where((v) => v["owner_id"] == widget.user_id).toList();
           user_tasks.addAll(taskAbout);
@@ -267,7 +279,7 @@ class _MyTaskPageState extends State<MyTaskPage>
           appBar: AppBar(
             centerTitle: true, //标题居中
             title: Text("我的任务",
-                style: TextStyle(fontSize: 20, color: Colors.white)),
+                style: TextStyle(fontSize: 18, color: Colors.white)),
             elevation: 0.5, //阴影高度
             //shadowColor: Colors.red,
             bottom: TabBar(
@@ -330,7 +342,10 @@ class _MyTaskPageState extends State<MyTaskPage>
             GestureDetector(
               child: ListTile(
                 title: toDos.isEmpty
-                    ? Text("加载中...")
+                    ? Text(
+                        "加载中...",
+                        style: TextStyle(fontSize: 18),
+                      )
                     : Text(
                         toDos[index]["title"],
                         style: TextStyle(fontSize: 18),
@@ -343,9 +358,11 @@ class _MyTaskPageState extends State<MyTaskPage>
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => MyTaskDetailPage(
-                          taskDetail: toDos[index],
-                          user_id: widget.user_id,
-                          username: widget.username)));
+                            taskDetail: toDos[index],
+                            user_id: widget.user_id,
+                            username: widget.username,
+                            ipText: widget.ipText,
+                          )));
                 },
               ),
               onLongPressStart: (LongPressStartDetails details) {

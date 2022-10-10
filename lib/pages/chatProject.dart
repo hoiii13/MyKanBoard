@@ -17,13 +17,15 @@ class ChatProjectPage extends StatefulWidget {
   final task_title;
   final project_id;
   final username;
+  final ipText;
   ChatProjectPage(
       {Key? key,
       required this.task_id,
       required this.user_id,
       required this.task_title,
       required this.project_id,
-      this.username})
+      this.username,
+      required this.ipText})
       : super(key: key);
 
   @override
@@ -54,7 +56,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "id": 148484683,
           "params": {"task_id": task_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -84,7 +87,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
             "content": content,
           }
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -109,7 +113,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "id": 867839500,
           "params": {"comment_id": commtent_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -142,7 +147,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "id": 1601016721,
           "params": [project_id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -178,7 +184,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "id": 1769674781,
           "params": {"user_id": user_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -267,7 +274,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-              title: Text("任务：${task_title}"),
+              title: Text("${task_title}"),
               content: Text("${sendPeople}@提到了你: \n\n${content}"),
               semanticLabel: 'Label',
               actions: <Widget>[
@@ -277,7 +284,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
                     },
                     child: Text(
                       "ok",
-                      style: TextStyle(color: Colors.red),
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 191, 64, 100)),
                     ))
               ],
             ));
@@ -358,6 +366,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
         builder: (_) => MyMessagePage(
               user_id: widget.user_id,
               username: widget.username,
+              ipText: widget.ipText,
             )));
   }
 
@@ -587,7 +596,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
               height: 250,
               child: const Center(
                   child: CircularProgressIndicator(
-                color: Colors.red,
+                color: Color.fromARGB(255, 0, 29, 72),
               )),
             );
           });

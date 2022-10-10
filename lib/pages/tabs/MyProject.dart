@@ -11,7 +11,13 @@ class ProjectAboutpage extends StatefulWidget {
   final username;
   final userToken;
   final user_id;
-  ProjectAboutpage({Key? key, this.username, this.userToken, this.user_id})
+  final ipText;
+  ProjectAboutpage(
+      {Key? key,
+      this.username,
+      this.userToken,
+      this.user_id,
+      required this.ipText})
       : super(key: key);
 
   @override
@@ -36,7 +42,8 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
     final response = await httpCode.requestHttpCode(
         json.encode(
             {"jsonrpc": "2.0", "method": "getmyProjects", "id": 2134420212}),
-        baseCode);
+        baseCode,
+        widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final myProjects = json.decode(res);
@@ -70,7 +77,8 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
           "id": 1769674781,
           "params": {"user_id": user_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=");
+        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -91,7 +99,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-              title: Text("任务：${task_title}"),
+              title: Text("${task_title}"),
               content: Text("${sendPeople}@提到了你: \n\n${content}"),
               semanticLabel: 'Label',
               actions: <Widget>[
@@ -147,7 +155,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
         centerTitle: true, //标题居中
         title: const Text(
           "我的项目",
-          style: TextStyle(fontSize: 20, color: Colors.white),
+          style: TextStyle(fontSize: 18, color: Colors.white),
         ),
         elevation: 0.5, //阴影高度
       ),
@@ -190,10 +198,13 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
                               title: _myProjects[index]["name"],
                               user_id: widget.user_id,
                               username: widget.username,
+                              ipText: widget.ipText,
                             )));
                   },
                 ),
-                const Divider()
+                const Divider(
+                  color: Colors.grey,
+                )
               ],
             );
           }),
