@@ -7,19 +7,22 @@ import '../pages/WriteIP.dart';
 
 final routes = {
   '/tabs': (context, {aguments, ipText}) => Tabs(ipText: ipText),
-  '/chats': (context, {task_id, user_id, project_id, task_title, ipText}) =>
+  '/chats': (context,
+          {task_id, user_id, project_id, task_title, ipText, token}) =>
       ChatProjectPage(
         task_id: task_id,
         user_id: user_id,
         task_title: task_title,
         project_id: project_id,
         ipText: ipText,
+        token: token,
       ),
   '/login': (context, {ipText}) => LoginPage(ipText: ipText),
-  '/message': (context, {user_id, username, ipText}) => MyMessagePage(
+  '/message': (context, {user_id, username, ipText, token}) => MyMessagePage(
         user_id: user_id,
         username: username,
         ipText: ipText,
+        token: token,
       ),
   '/': (context) => WriteIPPage()
 };

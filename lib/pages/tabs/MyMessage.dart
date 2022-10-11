@@ -13,8 +13,14 @@ class MyMessagePage extends StatefulWidget {
   final username;
   final name;
   final ipText;
+  final token;
   MyMessagePage(
-      {Key? key, this.user_id, this.username, this.name, required this.ipText})
+      {Key? key,
+      this.user_id,
+      this.username,
+      this.name,
+      required this.ipText,
+      required this.token})
       : super(key: key);
 
   @override
@@ -48,8 +54,8 @@ class _MyMessagePageState extends State<MyMessagePage> {
   _getProject() async {
     final response = await httpCode.requestHttpCode(
         json.encode(
-            {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212}),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+            {"jsonrpc": "2.0", "method": "getmyProjects", "id": 2134420212}),
+        widget.token,
         widget.ipText);
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
@@ -77,7 +83,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
           "id": 827046470,
           "params": [id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
 
     if (response.statusCode == 200) {
@@ -114,7 +120,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
           "id": 148484683,
           "params": {"task_id": task_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -425,11 +431,12 @@ class _MyMessagePageState extends State<MyMessagePage> {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => ChatProjectPage(
                                 task_id: taskComment[index]["task_id"],
-                                user_id: widget.user_id,
+                                user_id: widget.user_id.toString(),
                                 task_title: title,
                                 project_id: project_id,
                                 username: widget.username,
                                 ipText: widget.ipText,
+                                token: widget.token,
                               )));
                     },
                     icon: Icon(Icons.chevron_right)),
@@ -443,7 +450,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
             title: Text(
               "${taskComment[index]["comment"]}",
               overflow: TextOverflow.ellipsis,
-              maxLines: 2,
+              maxLines: 3,
             ),
             subtitle: Text(
               "${timeChange.timeStamp(

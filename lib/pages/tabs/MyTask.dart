@@ -14,13 +14,15 @@ class MyTaskPage extends StatefulWidget {
   final user_id;
   final username;
   final ipText;
+  final token;
 
-  MyTaskPage({
-    Key? key,
-    required this.user_id,
-    this.username,
-    required this.ipText,
-  }) : super(key: key);
+  MyTaskPage(
+      {Key? key,
+      required this.user_id,
+      this.username,
+      required this.ipText,
+      required this.token})
+      : super(key: key);
 
   @override
   State<MyTaskPage> createState() => _MyTaskPageState();
@@ -60,7 +62,7 @@ class _MyTaskPageState extends State<MyTaskPage>
           "id": 887036325,
           "params": [id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -73,6 +75,7 @@ class _MyTaskPageState extends State<MyTaskPage>
           column_title: row["title"],
         );
       }).toList();
+      print("!!!!!!!!_project == ${_projectColumns}");
 
       int len = _projectColumns.length;
 
@@ -93,7 +96,6 @@ class _MyTaskPageState extends State<MyTaskPage>
   _moveTaskToOthers(int task_id, int project_id, int column_id) async {
     final response = await httpCode.requestHttpCode(
         json.encode({
-          "jsonrpc": "2.0",
           "method": "moveTaskToProject",
           "id": 15775829,
           "params": [task_id, project_id, 1, column_id]
@@ -119,9 +121,14 @@ class _MyTaskPageState extends State<MyTaskPage>
   _getProject() async {
     final response = await httpCode.requestHttpCode(
         json.encode(
-            {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212}),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+            {"jsonrpc": "2.0", "method": "getmyProjects", "id": 2134420212}),
+        widget.token,
         widget.ipText);
+    /* final response = await httpCode.requestHttpCode(
+        json.encode(
+            {"jsonrpc": "2.0", "method": "getAllProjects", "id": 2134420212}),
+        widget.token,
+        widget.ipText); */
 
     if (response.statusCode != 200) {
       print(response.reasonPhrase);
@@ -153,7 +160,7 @@ class _MyTaskPageState extends State<MyTaskPage>
           "id": 827046470,
           "params": [id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
 
     if (response.statusCode == 200) {
@@ -175,8 +182,9 @@ class _MyTaskPageState extends State<MyTaskPage>
           _list = _tasks;
           /* final taskAbout =
               _list.where((v) => v["owner_id"] == widget.user_id).toList(); */
-          final taskAbout =
-              _list.where((v) => v["owner_id"] == widget.user_id).toList();
+          final taskAbout = _list
+              .where((v) => v["assignee_username"] == widget.username)
+              .toList();
           user_tasks.addAll(taskAbout);
 
           toDos0 = user_tasks.where((v) => v["column_name"] == "待办").toList();
@@ -359,9 +367,10 @@ class _MyTaskPageState extends State<MyTaskPage>
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => MyTaskDetailPage(
                             taskDetail: toDos[index],
-                            user_id: widget.user_id,
+                            user_id: widget.user_id.toString(),
                             username: widget.username,
                             ipText: widget.ipText,
+                            token: widget.token,
                           )));
                 },
               ),

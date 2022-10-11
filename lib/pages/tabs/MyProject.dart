@@ -9,15 +9,11 @@ import 'package:jpush_flutter/jpush_flutter.dart';
 
 class ProjectAboutpage extends StatefulWidget {
   final username;
-  final userToken;
+  final token;
   final user_id;
   final ipText;
   ProjectAboutpage(
-      {Key? key,
-      this.username,
-      this.userToken,
-      this.user_id,
-      required this.ipText})
+      {Key? key, this.username, this.token, this.user_id, required this.ipText})
       : super(key: key);
 
   @override
@@ -140,7 +136,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
 
   @override
   void initState() {
-    _getMyProjectList(widget.userToken);
+    _getMyProjectList(widget.token);
     Future.delayed(Duration(seconds: 1), () {
       initJpush(widget.username);
     });
@@ -181,7 +177,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
                     _myProjects[index]["name"],
                     style: TextStyle(fontSize: 18),
                   ),
-                  subtitle: users.length != _myProjects.length
+                  /* subtitle: users.length != _myProjects.length
                       ? Text(
                           "创建人：加载中...",
                           style: TextStyle(fontSize: 15),
@@ -189,7 +185,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
                       : Text(
                           "创建人：${_creatorList[index]["username"]}",
                           style: TextStyle(fontSize: 15),
-                        ),
+                        ), */
                   //subtitle: Text("创建人：${users[index]["username"]}"),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
@@ -199,6 +195,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
                               user_id: widget.user_id,
                               username: widget.username,
                               ipText: widget.ipText,
+                              token: widget.token,
                             )));
                   },
                 ),

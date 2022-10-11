@@ -18,6 +18,7 @@ class ChatProjectPage extends StatefulWidget {
   final project_id;
   final username;
   final ipText;
+  final token;
   ChatProjectPage(
       {Key? key,
       required this.task_id,
@@ -25,7 +26,8 @@ class ChatProjectPage extends StatefulWidget {
       required this.task_title,
       required this.project_id,
       this.username,
-      required this.ipText})
+      required this.ipText,
+      required this.token})
       : super(key: key);
 
   @override
@@ -56,7 +58,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "id": 148484683,
           "params": {"task_id": task_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
 
     if (response.statusCode == 200) {
@@ -87,7 +89,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
             "content": content,
           }
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
 
     if (response.statusCode == 200) {
@@ -113,7 +115,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "id": 867839500,
           "params": {"comment_id": commtent_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
 
     if (response.statusCode == 200) {
@@ -147,7 +149,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "id": 1601016721,
           "params": [project_id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
 
     if (response.statusCode == 200) {
@@ -158,7 +160,9 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           _allProjectUsers = allProjectUsers["result"];
           _allProjectUsers.forEach((key, value) {
             //因为_allProjectUsers是Map类型
-            users.add(key);
+            //users.add(key);
+            users.add(value);
+            print("user = ${users}");
             /*  print("value = ${key}");
           Map a = await _getUsers(int.parse(key));
           AllUsers.add(a);
@@ -184,7 +188,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           "id": 1769674781,
           "params": {"user_id": user_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
 
     if (response.statusCode == 200) {
@@ -367,6 +371,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
               user_id: widget.user_id,
               username: widget.username,
               ipText: widget.ipText,
+              token: widget.token,
             )));
   }
 
@@ -541,7 +546,6 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
                 List projectUserName =
                     await _getProjectUsers(widget.project_id);
                 _showChoicePeople(projectUserName);
-                print("project = ${projectUserName}");
               },
               child: const Text(
                 "@",
@@ -579,7 +583,45 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     );
   }
 
-  //@人的时候的底部弹窗
+  /* Future<void> _showChoicePeople(List people) async {
+    final _width = MediaQuery.of(context).size.width; //得到屏幕的宽
+
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            height: 250,
+            child: ListView.builder(
+                itemCount: people.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        contentPadding:
+                            EdgeInsets.fromLTRB(20, 0, _width * 0.2, 0),
+                        leading: CircleAvatar(
+                            backgroundColor: Color.fromARGB(255, 191, 64, 100),
+                            child: Text(
+                              people[index].substring(0, 1), //取名字的前1个字
+                              style: const TextStyle(color: Colors.white),
+                            )),
+                        title: Text("${people[index]}"),
+                        onTap: () {
+                          aliasList.add(people[index]);
+                          _textController.text =
+                              "${_textController.text + "@" + people[index]} ";
+                          Navigator.of(context).pop(people[index]);
+                        },
+                      ),
+                      const Divider()
+                    ],
+                  );
+                }),
+          );
+        });
+  }
+} */
+//@人的时候的底部弹窗
   Future<void> _showChoicePeople(List people) async {
     final _width = MediaQuery.of(context).size.width; //得到屏幕的宽
     List _people = [];

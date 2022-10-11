@@ -13,13 +13,15 @@ class ProjectListsPage extends StatefulWidget {
   final user_id;
   final username;
   final ipText;
+  final token;
   const ProjectListsPage(
       {Key? key,
       this.project_id,
       this.title,
       this.user_id,
       this.username,
-      required this.ipText})
+      required this.ipText,
+      required this.token})
       : super(key: key);
 
   @override
@@ -59,11 +61,15 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
           "id": 827046470,
           "params": [project_id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final projectBoard = json.decode(res);
+      /* final active = projectBoard["result"][0]["columns"]
+          .where((v) => v["is_active"] == "1")
+          .toList();
+      projectColumns = active; */
       projectColumns = projectBoard["result"][0]["columns"];
       //int len = projectColumns.length;
       if (mounted) {
@@ -91,7 +97,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
           "id": 1769674781,
           "params": {"user_id": user_id}
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
@@ -115,7 +121,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
           "id": 15775829,
           "params": [task_id, project_id, 1, column_id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
@@ -184,7 +190,11 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
   Widget build(BuildContext context) {
     //为了让默认列表显示出来，并且在进行任务调整后不会让列表消失
     if (projectColumns.isNotEmpty) {
-      _taskLists = projectColumns[num]["tasks"];
+      _taskLists = projectColumns[num]["tasks"]
+          .where((v) => v["is_active"] == "1")
+          .toList();
+      //_taskLists = projectColumns[num]["tasks"];
+      print("_taskList= ${_taskLists}");
     }
     return Scaffold(
       appBar: AppBar(
@@ -283,7 +293,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
   Widget _buildTasksList(List tasksList) {
     final _heigth = MediaQuery.of(context).size.height; //得到屏幕的宽高
 
-    return SingleChildScrollView(
+    return Scrollbar(
       child: Container(
         height: _heigth,
         child: ListView.builder(
@@ -300,20 +310,13 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
                               "截止时间:${timeChange.timeStamp(tasksList[index]["date_due"])}",
                               style: TextStyle(fontSize: 15)),
                       onTap: () async {
-                        print("eee = ${tasksList[index]["owner_id"]}");
-                        String name = "";
-                        if (tasksList[index]["owner_id"] != "0") {
-                          String name = await _getUser(
-                              int.parse(tasksList[index]["owner_id"]));
-                        }
-
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => MyTaskDetailPage(
                                   taskDetail: tasksList[index],
-                                  user_id: widget.user_id,
-                                  //user_id: tasksList[index]["owner_id"],
+                                  user_id: widget.user_id.toString(),
                                   username: widget.username,
                                   ipText: widget.ipText,
+                                  token: widget.token,
                                 )));
                       },
                     ),

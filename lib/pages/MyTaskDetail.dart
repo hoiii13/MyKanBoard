@@ -14,12 +14,14 @@ class MyTaskDetailPage extends StatefulWidget {
   final user_id;
   final username;
   final ipText;
+  final token;
   MyTaskDetailPage(
       {Key? key,
       required this.taskDetail,
       required this.user_id,
       this.username,
-      required this.ipText})
+      required this.ipText,
+      required this.token})
       : super(key: key);
   @override
   State<MyTaskDetailPage> createState() => _MyTaskDetailPageState();
@@ -113,6 +115,10 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
     });
     int id = int.parse(widget.taskDetail["creator_id"]);
     _getCreateTasksUser(id);
+    if (widget.user_id is String) {
+      print(">>>>> ${widget.user_id}");
+    }
+
     super.initState();
   }
 
@@ -385,6 +391,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                             project_id: widget.taskDetail["project_id"],
                             username: widget.username,
                             ipText: widget.ipText,
+                            token: widget.token,
                           )));
                 },
                 child: const Text(

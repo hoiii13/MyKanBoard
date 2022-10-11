@@ -39,7 +39,25 @@ class _TabsState extends State<Tabs> {
   RequestHttp httpCode = RequestHttp();
   final JPush jpush = JPush();
 
-  _getUser(String username) async {
+  _getMe() async {
+    final response = await httpCode.requestHttpCode(
+        json.encode({"jsonrpc": "2.0", "method": "getMe", "id": 1718627783}),
+        widget.token,
+        widget.ipText);
+    if (response.statusCode == 200) {
+      final res = await response.stream.bytesToString();
+      final userContent = json.decode(res);
+      setState(() {
+        _userInfo = userContent["result"];
+        print("_userInfo = ${_userInfo["id"]}");
+      });
+      //userInfo_id = _userInfo["id"].toString();
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  /* _getUser(String username) async {
     final response = await httpCode.requestHttpCode(
         json.encode({
           "jsonrpc": "2.0",
@@ -61,7 +79,7 @@ class _TabsState extends State<Tabs> {
     } else {
       print(response.reasonPhrase);
     }
-  }
+  } */
 
   int _currentIndex = 0;
 
@@ -96,11 +114,12 @@ class _TabsState extends State<Tabs> {
       print("没有token");
     }
 
-    String? name = widget.username;
+    _getMe();
+    /* String? name = widget.username;
     if (name != null) {
       _getUser(name);
       //initJpush(name);
-    }
+    } */
 
     super.initState();
   }
@@ -114,16 +133,18 @@ class _TabsState extends State<Tabs> {
         user_id: _userInfo["id"],
         username: _userInfo["username"],
         ipText: widget.ipText,
+        token: widget.token,
       ), //我的任务
       MyMessagePage(
         user_id: _userInfo["id"],
         username: _userInfo["username"],
         name: _userInfo["name"],
         ipText: widget.ipText,
+        token: widget.token,
       ), //我的消息
       ProjectAboutpage(
         username: widget.username,
-        userToken: widget.token,
+        token: widget.token,
         user_id: _userInfo["id"],
         ipText: widget.ipText,
       ), //项目
