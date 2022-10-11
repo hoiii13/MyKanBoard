@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 
+//toast
 class ToastPosition {
   static OverlayEntry? overlayEntry;
   static final ToastPosition _showToast = ToastPosition._internal();
@@ -17,9 +17,10 @@ class ToastPosition {
           color: Colors.transparent,
           child: Container(
             width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width/4),
+            padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width / 4),
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 10,horizontal: 30),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 30),
               decoration: BoxDecoration(
                 color: Colors.grey,
                 borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -45,4 +46,4 @@ class ToastPosition {
       overlayEntry = null;
     });
   }
-  }
+}

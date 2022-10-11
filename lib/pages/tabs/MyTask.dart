@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:board_app/component/receivedJpush.dart';
 import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
 import 'package:board_app/pages/chatProject.dart';
@@ -35,11 +36,11 @@ class _MyTaskPageState extends State<MyTaskPage>
   List toDos0 = [];
   List toDos1 = [];
   List toDos2 = [];
+
   late AnimationController _animateController;
-
   RequestHttp httpCode = RequestHttp();
-
   TimeChange timeChange = TimeChange();
+  ReceviedJPushCode showBox = ReceviedJPushCode();
 
   Future<void> _onRefresh() async {
     print("执行刷新");
@@ -96,11 +97,12 @@ class _MyTaskPageState extends State<MyTaskPage>
   _moveTaskToOthers(int task_id, int project_id, int column_id) async {
     final response = await httpCode.requestHttpCode(
         json.encode({
+          "jsonrpc": "2.0",
           "method": "moveTaskToProject",
           "id": 15775829,
           "params": [task_id, project_id, 1, column_id]
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.token,
         widget.ipText);
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
@@ -197,29 +199,8 @@ class _MyTaskPageState extends State<MyTaskPage>
     }
   }
 
-  _showAlertDialog(String task_title, String content, String sendPeople) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text("任务：${task_title}"),
-              content: Text("${sendPeople}@提到了你: \n\n${content}"),
-              semanticLabel: 'Label',
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      "ok",
-                      style: TextStyle(color: Colors.red),
-                    ))
-              ],
-            ));
-  }
-
 //6022 alias 操作正在进行中，暂时不能进行其他 alias 操作 3.0.7 版本新增的错误码，
 //多次调用 alias 相关的 API，请在获取到上一次调用回调后再做下一次操作；在未取到回调的情况下，等待 20 秒后再做下一次操作。
-
 //6002 alias的接口调用频率是5s以上，低于5s就会报6002超时
   Future initJpush(String aliasName) async {
     jpush.applyPushAuthority(
@@ -247,8 +228,9 @@ class _MyTaskPageState extends State<MyTaskPage>
           onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        _showAlertDialog(
-            message["title"], message["alert"], _extra["sendPeople"]);
+        final buildContext = context as BuildContext;
+        showBox.showAlertDialog(
+            context, message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
@@ -266,7 +248,7 @@ class _MyTaskPageState extends State<MyTaskPage>
     _getProject();
     //String? name = widget.username;
     Future.delayed(Duration(seconds: 1), () {
-      initJpush(widget.username);
+      initJpush("user" + widget.user_id.toString());
     });
     //print("pppp = $name");
     tabController = TabController(length: 3, vsync: this) //监听tabBar
@@ -350,13 +332,19 @@ class _MyTaskPageState extends State<MyTaskPage>
             GestureDetector(
               child: ListTile(
                 title: toDos.isEmpty
-                    ? Text(
-                        "加载中...",
-                        style: TextStyle(fontSize: 18),
+                    ? Container(
+                        margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                        child: Text(
+                          "加载中...",
+                          style: TextStyle(fontSize: 18),
+                        ),
                       )
-                    : Text(
-                        toDos[index]["title"],
-                        style: TextStyle(fontSize: 18),
+                    : Container(
+                        margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                        child: Text(
+                          toDos[index]["title"],
+                          style: TextStyle(fontSize: 18),
+                        ),
                       ),
                 subtitle: toDos[index]["date_due"] == "0"
                     ? Text("截止时间: 未设置", style: TextStyle(fontSize: 15))
@@ -381,7 +369,12 @@ class _MyTaskPageState extends State<MyTaskPage>
                     toDos[index]);
               },
             ),
-            const Divider()
+            Container(
+              margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+              child: Divider(
+                color: Colors.grey[200],
+              ),
+            ),
           ],
         );
       },
@@ -433,6 +426,7 @@ class _MyTaskPageState extends State<MyTaskPage>
       } else if (value == 2) {
         final _columns = await _getProjectColumns(project_id, text2);
         int columns = int.parse(_columns);
+        print("move = ${task_id}  ${project_id} ${columns}");
         _moveTaskToOthers(task_id, project_id, columns);
       }
     });

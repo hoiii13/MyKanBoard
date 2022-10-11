@@ -1,3 +1,4 @@
+import 'package:board_app/component/receivedJpush.dart';
 import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
 import 'package:board_app/pages/chatProject.dart';
@@ -37,6 +38,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
   List _TaskDetails = [];
   List _tasksList = [];
   List _isClicks = [false];
+  ReceviedJPushCode showBox = ReceviedJPushCode();
   //bool _isClick = false;
 
   Future<void> _onRefresh() async {
@@ -136,25 +138,6 @@ class _MyMessagePageState extends State<MyMessagePage> {
   }
 
   List _taskName = [];
-  _showAlertDialog(String task_title, String content, String sendPeople) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text("任务：${task_title}"),
-              content: Text("${sendPeople}@提到了你: \n\n${content}"),
-              semanticLabel: 'Label',
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      "ok",
-                      style: TextStyle(color: Colors.red),
-                    ))
-              ],
-            ));
-  }
 
   Future initJpush(String aliasName) async {
     jpush.applyPushAuthority(
@@ -168,8 +151,8 @@ class _MyMessagePageState extends State<MyMessagePage> {
           onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        _showAlertDialog(
-            message["title"], message["alert"], _extra["sendPeople"]);
+        showBox.showAlertDialog(
+            context, message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
@@ -183,7 +166,7 @@ class _MyMessagePageState extends State<MyMessagePage> {
   void initState() {
     _getProject();
     Future.delayed(Duration(seconds: 1), () {
-      initJpush(widget.username);
+      initJpush("user" + widget.user_id.toString());
     });
     super.initState();
   }

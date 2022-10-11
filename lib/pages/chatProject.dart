@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:board_app/component/receivedJpush.dart';
 import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
 import 'package:board_app/pages/tabs/MyMessage.dart';
@@ -49,6 +50,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
   List sendComment = [];
 
   List aliasList = [];
+  List userIds = [];
+  ReceviedJPushCode showBox = ReceviedJPushCode();
   //根据任务得到这个任务的所有评论记录
   Future<List> _getComments(int task_id) async {
     final response = await httpCode.requestHttpCode(
@@ -161,8 +164,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           _allProjectUsers.forEach((key, value) {
             //因为_allProjectUsers是Map类型
             //users.add(key);
+            userIds.add(key);
             users.add(value);
-            print("user = ${users}");
             /*  print("value = ${key}");
           Map a = await _getUsers(int.parse(key));
           AllUsers.add(a);
@@ -208,7 +211,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
   List commentsAll = [];
   late Timer _timer;
 
-  _getTaskDetail(int task_id) async {
+  /* _getTaskDetail(int task_id) async {
     Map _taskDetail = {};
     var headers = {
       'Authorization':
@@ -236,7 +239,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
       print(response.reasonPhrase);
     }
     return _taskDetail;
-  }
+  } */
 
 //极光推送
   void _pushMessage(List alias, String alertContent, String task_title,
@@ -274,27 +277,6 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     }
   }
 
-  _showAlertDialog(String task_title, String content, String sendPeople) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text("${task_title}"),
-              content: Text("${sendPeople}@提到了你: \n\n${content}"),
-              semanticLabel: 'Label',
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      "ok",
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 191, 64, 100)),
-                    ))
-              ],
-            ));
-  }
-
   Future initJpush(String aliasName) async {
     jpush.applyPushAuthority(
         new NotificationSettingsIOS(sound: true, alert: true, badge: true));
@@ -316,8 +298,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
       }, onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        _showAlertDialog(
-            message["title"], message["alert"], _extra["sendPeople"]);
+        showBox.showAlertDialog(
+            context, message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
@@ -332,7 +314,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     print("sendCom = ${widget.user_id}");
     _getComments(int.parse(widget.task_id));
     Future.delayed(Duration(seconds: 1), () {
-      initJpush(widget.username);
+      initJpush("user" + widget.user_id.toString());
     });
     /* if (AllComments.length != 0) {
       _jumpBottom();
@@ -469,50 +451,6 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     }
   }
 
-/* //评论内容
-  StreamBuilder<List> buildChatStream() {
-    return StreamBuilder(
-        stream: _streamController.stream,
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          //return Text("${snapshot.data}");
-          if (snapshot.data == null) {
-            return const Expanded(
-              child: Center(
-                  child: CircularProgressIndicator(
-                color: Colors.red,
-              )),
-            );
-          } else {
-            final ChatContents = snapshot.data;
-            //int len = ChatContents.length - 1;
-            print("LiaoTian = ${ChatContents}");
-            return Expanded(
-              child: ListView.builder(
-                  reverse: true, //先翻转再倒着输出，这样是为了在我们打开评论页面的时候页面是处于最底部
-                  controller: _msgController,
-                  itemCount: ChatContents.length,
-                  itemBuilder: (context, index) {
-                    return BubbleWidget(
-                      //avatar: comments[index]["avatar_path"] == "" ? name : ,
-                      text: ChatContents[ChatContents.length - 1 - index]["comment"],
-                      isMyself:
-                          ChatContents[ChatContents.length - 1 - index]["user_id"] == widget.user_id
-                              ? true
-                              : false,
-                      name: ChatContents[ChatContents.length - 1 - index]["name"] == null ||
-                              ChatContents[ChatContents.length - 1 - index]["name"] == ""
-                          ? ChatContents[ChatContents.length - 1 - index]["username"]
-                          : ChatContents[ChatContents.length - 1 - index]["name"],
-                      time: ChatContents[ChatContents.length - 1 - index]["date_creation"],
-                    );
-                  }),
-            );
-          }
-
-          //return chatView(snapshot.data, widget.user_id);
-        });
-  }
- */
 //输入框
   Widget inputView() {
     return Container(
@@ -545,7 +483,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
               onPressed: () async {
                 List projectUserName =
                     await _getProjectUsers(widget.project_id);
-                _showChoicePeople(projectUserName);
+                _showChoicePeople(projectUserName, userIds);
               },
               child: const Text(
                 "@",
@@ -583,7 +521,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
     );
   }
 
-  /* Future<void> _showChoicePeople(List people) async {
+  Future<void> _showChoicePeople(List people, List _userIds) async {
     final _width = MediaQuery.of(context).size.width; //得到屏幕的宽
 
     showModalBottomSheet(
@@ -607,7 +545,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
                             )),
                         title: Text("${people[index]}"),
                         onTap: () {
-                          aliasList.add(people[index]);
+                          aliasList.add("user" + userIds[index]);
                           _textController.text =
                               "${_textController.text + "@" + people[index]} ";
                           Navigator.of(context).pop(people[index]);
@@ -620,8 +558,8 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           );
         });
   }
-} */
-//@人的时候的底部弹窗
+}
+/* //@人的时候的底部弹窗
   Future<void> _showChoicePeople(List people) async {
     final _width = MediaQuery.of(context).size.width; //得到屏幕的宽
     List _people = [];
@@ -696,7 +634,7 @@ class _ChatProjectPageState extends State<ChatProjectPage> {
           });
     }
   }
-}
+} */
 
 //聊天气泡处
 class BubbleWidget extends StatelessWidget {

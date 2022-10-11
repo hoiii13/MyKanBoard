@@ -91,6 +91,12 @@ flutter:
     - family: Siyuan-UltraLight
       fonts:
         - asset: fonts/STHeiti-UltraLight-2.ttc
+    - family: CangEr03
+      fonts:
+        - asset: fonts/CangErShuYuanTiW03-2.ttf
+    - family: CangEr01
+      fonts:
+        - asset: fonts/CangErYuMoW01-2.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

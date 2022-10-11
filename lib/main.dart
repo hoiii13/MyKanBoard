@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         theme: ThemeData(
             primarySwatch: createMaterialColor(Color.fromARGB(255, 0, 29, 72)),
-            fontFamily: "Siyuan-Light"),
+            fontFamily: "CangEr"),
         /* builder: (context, widget) {
           return MediaQuery(
               data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),

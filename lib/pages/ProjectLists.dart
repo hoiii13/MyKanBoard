@@ -1,3 +1,4 @@
+import 'package:board_app/component/receivedJpush.dart';
 import 'package:board_app/component/timeChange.dart';
 import 'package:board_app/pages/MyTaskDetail.dart';
 import 'package:board_app/pages/tabs/MyMessage.dart';
@@ -31,6 +32,7 @@ class ProjectListsPage extends StatefulWidget {
 class _ProjectListsPageState extends State<ProjectListsPage> {
   RequestHttp httpCode = RequestHttp();
   TimeChange timeChange = TimeChange();
+  ReceviedJPushCode showBox = ReceviedJPushCode();
   final JPush jpush = JPush();
   List columnTitles = [];
   List columnIds = [];
@@ -130,31 +132,10 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
       columnIds.clear();
       projectColumns.clear();
       _taskLists.clear();
-      columnTitle2.clear();
       _getBoards(int.parse(widget.project_id));
     } else {
       print(response.reasonPhrase);
     }
-  }
-
-  _showAlertDialog(String task_title, String content, String sendPeople) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text("任务：${task_title}"),
-              content: Text("${sendPeople}@提到了你: \n\n${content}"),
-              semanticLabel: 'Label',
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      "ok",
-                      style: TextStyle(color: Colors.red),
-                    ))
-              ],
-            ));
   }
 
   Future initJpush(String aliasName) async {
@@ -169,8 +150,8 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
           onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        _showAlertDialog(
-            message["title"], message["alert"], _extra["sendPeople"]);
+        showBox.showAlertDialog(
+            context, message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
@@ -183,6 +164,9 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
   @override
   void initState() {
     _getBoards(int.parse(widget.project_id));
+    Future.delayed(Duration(seconds: 1), () {
+      initJpush("user" + widget.user_id.toString());
+    });
     super.initState();
   }
 
@@ -194,7 +178,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
           .where((v) => v["is_active"] == "1")
           .toList();
       //_taskLists = projectColumns[num]["tasks"];
-      print("_taskList= ${_taskLists}");
+
     }
     return Scaffold(
       appBar: AppBar(
@@ -302,8 +286,11 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
               return Column(children: [
                 GestureDetector(
                     child: ListTile(
-                      title: Text(tasksList[index]["title"],
-                          style: TextStyle(fontSize: 18)),
+                      title: Container(
+                        margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                        child: Text(tasksList[index]["title"],
+                            style: TextStyle(fontSize: 18)),
+                      ),
                       subtitle: tasksList[index]["date_due"] == "0"
                           ? Text("截止时间: 未设置", style: TextStyle(fontSize: 15))
                           : Text(
@@ -324,7 +311,6 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
                       double globlePositionX = details.globalPosition.dx;
                       double globlePositionY = details.globalPosition.dy;
 
-                      print("$columnTitle2---$columnTitles");
                       onLongPress(context, globlePositionX, globlePositionY,
                           tasksList[index], columnTitles, columnIds);
                     }),
@@ -361,6 +347,7 @@ class _ProjectListsPageState extends State<ProjectListsPage> {
 
       //添加这个判断是为了在长按列表后，如果取消点击，这样不会报错（因为value为null时，则不执行_moveTaskToOthers函数）
       if (value != null) {
+        print("move = ${task_id}  ${project_id} ${columnId[value]}");
         _moveTaskToOthers(task_id, project_id, columnId[value]);
       } else {
         print("取消");

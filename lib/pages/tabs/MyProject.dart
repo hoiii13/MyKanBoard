@@ -1,3 +1,4 @@
+import 'package:board_app/component/receivedJpush.dart';
 import 'package:board_app/pages/ProjectLists.dart';
 import 'package:board_app/pages/chatProject.dart';
 import 'package:board_app/pages/tabs/MyMessage.dart';
@@ -30,8 +31,12 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
   List users = [];
   List _creatorList = [];
   List creatorIds = [];
+  List projectColumns = [];
   int num = 0;
+  List columnTitles = [];
+  List columnIds = [];
   final JPush jpush = JPush();
+  ReceviedJPushCode showBox = ReceviedJPushCode();
 
   //得到与用户有关的所有项目的id和title
   void _getMyProjectList(String baseCode) async {
@@ -58,6 +63,41 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
               users.add(_user);
             });
           }
+        });
+      }
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  _getBoards(int project_id) async {
+    final response = await httpCode.requestHttpCode(
+        json.encode({
+          "jsonrpc": "2.0",
+          "method": "getBoard",
+          "id": 827046470,
+          "params": [project_id]
+        }),
+        widget.token,
+        widget.ipText);
+    if (response.statusCode == 200) {
+      final res = await response.stream.bytesToString();
+      final projectBoard = json.decode(res);
+      /* final active = projectBoard["result"][0]["columns"]
+          .where((v) => v["is_active"] == "1")
+          .toList();
+      projectColumns = active; */
+      projectColumns = projectBoard["result"][0]["columns"];
+      //int len = projectColumns.length;
+      if (mounted) {
+        setState(() {
+          for (var i = 0; i < projectColumns.length; i++) {
+            columnTitles.add(projectColumns[i]["title"]);
+
+            columnIds.add(projectColumns[i]["id"]);
+          }
+          // print("111 = ${columnTitles}");
+          //print("object = ${projectBoard["result"][0]["columns"][2]}");
         });
       }
     } else {
@@ -123,8 +163,8 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
           onOpenNotification: (Map<String, dynamic> message) async {
         final res = message["extras"]["cn.jpush.android.EXTRA"];
         final _extra = json.decode(res);
-        _showAlertDialog(
-            message["title"], message["alert"], _extra["sendPeople"]);
+        showBox.showAlertDialog(
+            context, message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
@@ -138,7 +178,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
   void initState() {
     _getMyProjectList(widget.token);
     Future.delayed(Duration(seconds: 1), () {
-      initJpush(widget.username);
+      initJpush("user" + widget.user_id.toString());
     });
     super.initState();
   }
@@ -155,6 +195,7 @@ class _ProjectAboutpageState extends State<ProjectAboutpage> {
         ),
         elevation: 0.5, //阴影高度
       ),
+      backgroundColor: Colors.grey[200],
       body: ListView.builder(
           itemCount: _myProjects.length,
           itemBuilder: (context, index) {

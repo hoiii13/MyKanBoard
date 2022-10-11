@@ -37,6 +37,7 @@ class _MyCenterPageState extends State<MyCenterPage> {
   Map _userMessage = {};
   Map _appRoles = {};
   final JPush jpush = JPush();
+  ReceviedJPushCode showBox = ReceviedJPushCode();
 
   void _getMe(String baseCode) async {
     final response = await httpCode.requestHttpCode(
@@ -61,13 +62,14 @@ class _MyCenterPageState extends State<MyCenterPage> {
           "method": "getApplicationRoles",
           "id": 317154243
         }),
-        "anNvbnJwYzpiMDNhMWRlODcxNmE5YTc2MDc0MTc2MjEyNTc0OTc2MjM2YWI1YjczOThkMmU3NGJmYzM5MmRhYjZkZGM=",
+        widget.userToken,
         widget.ipText);
 
     if (response.statusCode == 200) {
       final res = await response.stream.bytesToString();
       final appRoles = json.decode(res);
       _appRoles = appRoles["result"];
+      // print("appR = ${_appRoles}");
     } else {
       print(response.reasonPhrase);
     }
@@ -87,26 +89,6 @@ class _MyCenterPageState extends State<MyCenterPage> {
     print("delete = $result");
   }
 
-  _showAlertDialog(String task_title, String content, String sendPeople) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text("任务：${task_title}"),
-              content: Text("${sendPeople}@提到了你: \n\n${content}"),
-              semanticLabel: 'Label',
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      "ok",
-                      style: TextStyle(color: Colors.red),
-                    ))
-              ],
-            ));
-  }
-
   Future initJpush(String aliasName) async {
     jpush.applyPushAuthority(
         new NotificationSettingsIOS(sound: true, alert: true, badge: true));
@@ -124,8 +106,8 @@ class _MyCenterPageState extends State<MyCenterPage> {
           content: message["alert"],
           sendPeople: _extra["sendPeople"],
         ); */
-        _showAlertDialog(
-            message["title"], message["alert"], _extra["sendPeople"]);
+        showBox.showAlertDialog(
+            context, message["title"], message["alert"], _extra["sendPeople"]);
         print("flutter onOpenNotification: $message");
       }, onReceiveMessage: (Map<String, dynamic> message) async {
         print("flutter onReceiveMessage: $message");
@@ -138,7 +120,7 @@ class _MyCenterPageState extends State<MyCenterPage> {
   @override
   void initState() {
     Future.delayed(Duration(seconds: 2), () {
-      initJpush(widget.username);
+      initJpush("user" + widget.user_id.toString());
     });
     _getMe(widget.userToken);
     _getAppRoles();
@@ -290,30 +272,28 @@ class _MyCenterPageState extends State<MyCenterPage> {
                 child: Container(
                     color: Colors.grey[200],
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Padding(
-                          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                          padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
                           child: Container(
                             color: Colors.white,
                             width: _width,
-                            /* decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  style: BorderStyle.solid,
-                                  width: 2.0,
-                                ),
-                                borderRadius: BorderRadius.circular(5.0)), */
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 ListTile(
                                   leading: const Icon(Icons.mail,
                                       color: Color.fromARGB(255, 0, 29, 72)),
-                                  title: const Text(
-                                    "邮箱:",
-                                    style: TextStyle(
-                                        color: Color.fromARGB(255, 0, 29, 72),
-                                        fontSize: 17),
+                                  title: Container(
+                                    transform:
+                                        Matrix4.translationValues(-15, 0, 0),
+                                    child: const Text(
+                                      "邮箱:",
+                                      style: TextStyle(
+                                          color: Color.fromARGB(255, 0, 29, 72),
+                                          fontSize: 17),
+                                    ),
                                   ),
                                   trailing: _userMessage["email"] == ""
                                       ? Text(
@@ -333,18 +313,21 @@ class _MyCenterPageState extends State<MyCenterPage> {
                                 ),
                                 const Divider(
                                   color: Color.fromARGB(255, 238, 238, 238),
-                                  thickness: 2,
                                 ),
                                 ListTile(
                                   leading: const Icon(
-                                    Icons.emoji_people,
+                                    Icons.assignment_ind,
                                     color: Color.fromARGB(255, 0, 29, 72),
                                   ),
-                                  title: const Text(
-                                    "角色:",
-                                    style: TextStyle(
-                                        color: Color.fromARGB(255, 0, 29, 72),
-                                        fontSize: 17),
+                                  title: Container(
+                                    transform:
+                                        Matrix4.translationValues(-15, 0, 0),
+                                    child: const Text(
+                                      "角色:",
+                                      style: TextStyle(
+                                          color: Color.fromARGB(255, 0, 29, 72),
+                                          fontSize: 17),
+                                    ),
                                   ),
                                   trailing: _userMessage["role"] == ""
                                       ? Text(
@@ -369,7 +352,7 @@ class _MyCenterPageState extends State<MyCenterPage> {
                         Container(
                           width: _width * 0.5,
                           height: 50,
-                          margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                          margin: EdgeInsets.fromLTRB(0, 30, 0, 40),
                           child: ElevatedButton(
                             onPressed: () {
                               jpush.deleteAlias();
@@ -381,7 +364,7 @@ class _MyCenterPageState extends State<MyCenterPage> {
                           ),
                         ),
                       ],
-                    )))
+                    ))),
           ],
         ),
       );
