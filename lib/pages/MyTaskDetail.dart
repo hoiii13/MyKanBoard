@@ -148,7 +148,7 @@ class _MyTaskDetailPageState extends State<MyTaskDetailPage> {
                     style: BorderStyle.solid,
                     width: 2.0,
                   ),
-                  borderRadius: BorderRadius.circular(5.0)),
+                  borderRadius: BorderRadius.circular(10.0)),
               //alignment: AlignmentDirectional.topStart,
               child: Padding(
                 padding: EdgeInsets.all(15.0),
